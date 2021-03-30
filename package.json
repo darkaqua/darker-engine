@@ -1,0 +1,22 @@
+{
+  "name": "node-with-typescript",
+  "version": "0.0.0",
+  "description": "",
+  "main": "src/index.ts",
+  "scripts": {
+    "test": "./node_modules/.bin/nodemon",
+    "start": "./node_modules/.bin/ts-node ./src/index.ts"
+  },
+  "keywords": [
+    "node",
+    "typescript"
+  ],
+  "author": "darkaqua",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "latest",
+    "nodemon": "latest",
+    "ts-node": "latest",
+    "typescript": "latest"
+  }
+}
