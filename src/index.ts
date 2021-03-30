@@ -7,12 +7,14 @@ console.log('Hello world!');
 
 enum SystemEnum {
     SOMETHING,
-    SOMETHING_2
+    SOMETHING_2,
+    ON_SPIDER
 }
 
 enum ComponentEnum {
     PLAYER,
-    MOB
+    MOB,
+    WEB
 }
 
 const {
@@ -41,9 +43,46 @@ const mobEntity: EntityFunction<ComponentEnum> = (
     ]
 });
 
+const spiderEntity: EntityFunction<ComponentEnum> = () => ({
+    id: 'Spider',
+    components: [
+        ComponentEnum.MOB,
+        ComponentEnum.WEB
+    ]
+});
+
+const spiderSystem: SystemFunction<SystemEnum, ComponentEnum> = () => {
+
+    const onAdd = (id: string) => {
+        console.log('Spidemaaaaannn!!', id);
+
+        const entity = entities.get(id);
+
+        entity.updateComponent(ComponentEnum.WEB, {
+            text: 'No me siento bien señor Stark!',
+
+        });
+
+        setTimeout(() => {
+            entity.removeComponent(ComponentEnum.WEB);
+        }, 3000);
+    }
+    const onRemove = (id: string) => {
+        console.log(entities.get(id).getComponent(ComponentEnum.WEB).text, id);
+    }
+
+    return {
+        id: SystemEnum.ON_SPIDER,
+        components: [
+            ComponentEnum.MOB,
+            ComponentEnum.WEB
+        ],
+        onAdd,
+        onRemove
+    }
+}
+
 const playerSystem: SystemFunction<SystemEnum, ComponentEnum> = () => {
-
-
     const onAdd = (id: string) => {
         console.log('player', 'add', id);
         entities.add(mobEntity(`Mob_${id}`));
@@ -63,7 +102,6 @@ const playerSystem: SystemFunction<SystemEnum, ComponentEnum> = () => {
 }
 
 const playerSomethingSystem: SystemFunction<SystemEnum, ComponentEnum> = () => {
-
     const onAdd = (id: string) => {
         console.log('mob', 'add', id);
         console.log(entities.get(id).getData());
@@ -73,34 +111,31 @@ const playerSomethingSystem: SystemFunction<SystemEnum, ComponentEnum> = () => {
         console.log(entities.get(id).getData());
     }
 
-    const onLoop = (delta: number) => {
-        console.log(
-            getSystemEntities(SystemEnum.SOMETHING)
-                .map(id => entities.get(id).getData())
-        )
-    }
-
     return {
         id: SystemEnum.SOMETHING,
         components: [
             ComponentEnum.MOB
         ],
         onAdd,
-        onRemove,
-        onLoop
+        onRemove
     }
 }
 
 
 setSystems(
     playerSystem(),
-    playerSomethingSystem()
+    playerSomethingSystem(),
+    spiderSystem()
 );
 
 entities.add(
     playerEntity('Franz'),
     playerEntity('Pikolo')
 );
+
+setTimeout(() => {
+    entities.add(spiderEntity());
+}, 2000);
 
 const loopWorker = new LoopWorker({ ticksPerSecond: 20 });
 loopWorker.on('tick', (data) => onLoop(data.ms))
