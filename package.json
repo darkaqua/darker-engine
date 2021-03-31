@@ -1,11 +1,12 @@
 {
   "name": "darker-engine",
   "description": "ecs lightweight library",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "darkaqua",
   "license": "MIT",
   "main": "./build/index.js",
   "types": "./build/index.d.ts",
+  "repository": "https://github.com/darkaqua/darker-engine",
   "scripts": {
     "start:watch": "./node_modules/.bin/nodemon",
     "start": "./node_modules/.bin/ts-node ./src/index.ts",
