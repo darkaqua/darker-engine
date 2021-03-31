@@ -1,6 +1,6 @@
 # darker-engine
 
-Lightweight functional library implementaton of the [Entity-Component-System](https://en.wikipedia.org/wiki/Entity_component_system) pattern with typescript.
+Lightweight functional library implementation of the [Entity-Component-System](https://en.wikipedia.org/wiki/Entity_component_system) pattern with typescript.
 
 ## How to start:
 
