@@ -1,7 +1,7 @@
 {
   "name": "darker-engine",
   "description": "ecs lightweight library",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "author": "darkaqua",
   "license": "MIT",
   "main": "./build/index.js",
@@ -15,6 +15,14 @@
     "build:dts": "tsc src/index.ts --declaration --emitDeclarationOnly --outDir build"
   },
   "keywords": [
+    "ecs",
+    "entity-component-system",
+    "entity",
+    "component",
+    "system",
+    "lightweight",
+    "library",
+    "functional",
     "node",
     "typescript"
   ],
