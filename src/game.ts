@@ -1,5 +1,5 @@
 import {entitiesFunction} from "./entities";
-import {GameFunction, SystemType} from "./types";
+import {GameFunction, SystemFunction, SystemType} from "./types";
 
 export const game: GameFunction = <SystemEnum, ComponentEnum>() => {
     let systems: SystemType<SystemEnum, ComponentEnum>[] = [];
@@ -8,11 +8,15 @@ export const game: GameFunction = <SystemEnum, ComponentEnum>() => {
     // Contains which entities has every system
     const systemEntitiesMap = new Map<SystemEnum, string[]>();
 
-    const setSystems = (..._systems: SystemType<SystemEnum, ComponentEnum>[]) => {
-        _systems.forEach(system => {
-            systemEntitiesMap.set(system.id, []);
+    const setSystems = (..._systems: SystemFunction<SystemEnum, ComponentEnum>[]) => {
+        const systemList = _systems.map(system => {
+            const _system = system({
+                game: this
+            });
+            systemEntitiesMap.set(_system.id, []);
+            return _system;
         });
-        systems.push(..._systems);
+        systems.push(...systemList);
     }
 
     const entities = entitiesFunction<ComponentEnum>();

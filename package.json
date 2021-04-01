@@ -1,7 +1,7 @@
 {
   "name": "darker-engine",
   "description": "ecs lightweight library",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "author": "darkaqua",
   "license": "MIT",
   "main": "./build/index.js",
@@ -12,8 +12,12 @@
     "start": "./node_modules/.bin/ts-node ./src/index.ts",
     "build": "yarn run build:js && yarn run build:dts",
     "build:js": "esbuild src/index.ts --bundle --format=esm --outfile=build/index.js",
-    "build:dts": "tsc src/index.ts --declaration --emitDeclarationOnly --outDir build"
+    "build:dts": "tsc src/index.ts --declaration --emitDeclarationOnly --outDir build",
+    "prepublish": "yarn run build"
   },
+  "files": [
+    "build/"
+  ],
   "keywords": [
     "ecs",
     "entity-component-system",
