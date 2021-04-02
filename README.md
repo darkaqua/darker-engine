@@ -124,6 +124,7 @@ const spiderEntity: EntityFunction<ComponentEnum> = (
   name: string
 ) => ({
   id: name,
+  data: {},
   components: [
     ComponentEnum.SPIDY,
     ComponentEnum.MOB

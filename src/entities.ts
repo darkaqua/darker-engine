@@ -15,7 +15,10 @@ export const entitiesFunction: EntitiesFunction = <ComponentEnum>() => {
             entity.removeComponent = (component) => removeComponent(entity.id, component);
             entity.updateComponent = ((component, data) => updateComponent(entity.id, component, data));
 
-            entityDataMap.set(entity.id, entity.components.reduce((a, b) => ({...a, [b as any]: {}}), {}));
+            entityDataMap.set(entity.id, entity.components.reduce((a, b) => ({
+                ...a,
+                [b as any]: a[b] || {}
+            }), entity.data));
             return entity;
         })
     );

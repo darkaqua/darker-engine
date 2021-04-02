@@ -5,8 +5,8 @@
 export interface GameType<SystemEnum, ComponentEnum> {
     entities: EntitiesType<ComponentEnum>;
     onLoop: (delta: number) => any;
-    setSystems: (...systems: SystemFunction<SystemEnum, ComponentEnum>[]) => any;
-    getSystemEntities?: (system: SystemEnum) => string[];
+    setSystems?: (...systems: SystemFunction<SystemEnum, ComponentEnum>[]) => any;
+    getSystemEntityList?: (system: SystemEnum) => string[];
 }
 
 export type GameFunction = <SystemEnum, ComponentEnum>() => GameType<SystemEnum, ComponentEnum>;
@@ -20,11 +20,11 @@ export interface SystemType<SystemEnum, ComponentEnum> {
     onLoop?: (delta: number) => any;
     onAdd: (id: string) => any;
     onRemove: (id: string) => any;
-    getEntities?: () => string[];
 }
 
 export type SystemFunctionProps<SystemEnum, ComponentEnum> = {
-    game: GameType<SystemEnum, ComponentEnum>
+    getGame?: () => GameType<SystemEnum, ComponentEnum>;
+    getEntityList?: () => string[];
 }
 
 export type SystemFunction<SystemEnum, ComponentEnum> =
@@ -35,6 +35,7 @@ export type SystemFunction<SystemEnum, ComponentEnum> =
  */
 export interface EntityType<ComponentEnum> {
     id: string;
+    data: any;
     getData?: () => any;
     getComponent?: (component: ComponentEnum) => any;
     components: ComponentEnum[];

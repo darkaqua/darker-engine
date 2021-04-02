@@ -8,17 +8,6 @@ export const game: GameFunction = <SystemEnum, ComponentEnum>() => {
     // Contains which entities has every system
     const systemEntitiesMap = new Map<SystemEnum, string[]>();
 
-    const setSystems = (..._systems: SystemFunction<SystemEnum, ComponentEnum>[]) => {
-        const systemList = _systems.map(system => {
-            const _system = system({
-                game: this
-            });
-            systemEntitiesMap.set(_system.id, []);
-            return _system;
-        });
-        systems.push(...systemList);
-    }
-
     const entities = entitiesFunction<ComponentEnum>();
 
     const onAddComponent = (id: string) => {
@@ -67,12 +56,28 @@ export const game: GameFunction = <SystemEnum, ComponentEnum>() => {
         systems.forEach(system => system?.onLoop && system.onLoop(delta));
     }
 
-    const getSystemEntities = (system: SystemEnum) => systemEntitiesMap.get(system);
+    const getSystemEntityList = (system: SystemEnum) => systemEntitiesMap.get(system);
+
+    const setSystems = (..._systems: SystemFunction<SystemEnum, ComponentEnum>[]) => {
+        const systemList = _systems.map(system => {
+            const _system = system({
+                getGame: () => ({
+                    entities,
+                    onLoop,
+                    getSystemEntityList
+                }),
+                getEntityList: () => getSystemEntityList(_system.id)
+            });
+            systemEntitiesMap.set(_system.id, []);
+            return _system;
+        });
+        systems.push(...systemList);
+    }
 
     return {
         entities,
         onLoop,
         setSystems,
-        getSystemEntities
+        getSystemEntityList
     }
 }
