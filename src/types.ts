@@ -3,10 +3,12 @@
  * Game
  */
 export interface GameType<SystemEnum, ComponentEnum> {
-    entities: EntitiesType<ComponentEnum>;
-    onLoop: (delta: number) => any;
     setSystems?: (...systems: SystemFunction<SystemEnum, ComponentEnum>[]) => any;
-    getSystemEntityList?: (system: SystemEnum) => string[];
+    getEntityList?: () => EntityType<ComponentEnum>[],
+
+    getEntity?: (id: string) => EntityType<ComponentEnum>,
+    addEntity?: (...entities: EntityType<ComponentEnum>[]) => any,
+    removeEntity?: (id: string) => any
 }
 
 export type GameFunction = <SystemEnum, ComponentEnum>() => GameType<SystemEnum, ComponentEnum>;
@@ -17,13 +19,12 @@ export type GameFunction = <SystemEnum, ComponentEnum>() => GameType<SystemEnum,
 export interface SystemType<SystemEnum, ComponentEnum> {
     id: SystemEnum;
     components: ComponentEnum[];
-    onLoop?: (delta: number) => any;
-    onAdd: (id: string) => any;
-    onRemove: (id: string) => any;
+    onAdd?: (id: string) => any;
+    onUpdate?: (id: string) => any;
+    onRemove?: (id: string) => any;
 }
 
 export type SystemFunctionProps<SystemEnum, ComponentEnum> = {
-    getGame?: () => GameType<SystemEnum, ComponentEnum>;
     getEntityList?: () => string[];
 }
 
@@ -39,22 +40,9 @@ export interface EntityType<ComponentEnum> {
     getData?: () => any;
     getComponent?: (component: ComponentEnum) => any;
     components: ComponentEnum[];
-    addComponent?: (component: ComponentEnum) => any;
+    addComponent?: (component: ComponentEnum, data: any) => any;
     removeComponent?: (component: ComponentEnum) => any;
     updateComponent?: (component: ComponentEnum, data: any) => any;
 }
 
 export type EntityFunction<ComponentEnum> = (...props: any) => EntityType<ComponentEnum>;
-
-/**
- * Entities
- */
-export interface EntitiesType<ComponentEnum> {
-    getList: () => EntityType<ComponentEnum>[],
-
-    get: (id: string) => EntityType<ComponentEnum>,
-    add: (...entities: EntityType<ComponentEnum>[]) => any,
-    remove: (id: string) => any
-}
-
-export type EntitiesFunction = <ComponentEnum>() => EntitiesType<ComponentEnum>;

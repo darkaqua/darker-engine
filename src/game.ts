@@ -1,72 +1,19 @@
-import {entitiesFunction} from "./entities";
-import {GameFunction, SystemFunction, SystemType} from "./types";
+import {EntityType, GameFunction, SystemFunction, SystemType} from "./types";
 
 export const game: GameFunction = <SystemEnum, ComponentEnum>() => {
-    let systems: SystemType<SystemEnum, ComponentEnum>[] = [];
-    // Contains which components has every entity
-    const entityComponentMap = new Map<string, ComponentEnum[]>();
+    const systems: SystemType<SystemEnum, ComponentEnum>[] = [];
+    let entityList: EntityType<ComponentEnum>[] = [];
+    // Contains which components/data has every entity
+    const entityDataMap = new Map<string, any>();
     // Contains which entities has every system
     const systemEntitiesMap = new Map<SystemEnum, string[]>();
 
-    const entities = entitiesFunction<ComponentEnum>();
-
-    const onAddComponent = (id: string) => {
-        const components = entityComponentMap.get(id) || [];
-        systems
-            .filter(system => systemEntitiesMap.get(system.id).indexOf(id) === -1)
-            .filter(system => system.components.every(_component => components.indexOf(_component) > -1))
-            .forEach(system => {
-                systemEntitiesMap.set(system.id, [...systemEntitiesMap.get(system.id), id]);
-                system.onAdd(id);
-            });
-    }
-
-    const onRemoveComponent = (id: string) => {
-        const components = entityComponentMap.get(id) || [];
-        systems
-            .filter(system => systemEntitiesMap.get(system.id).indexOf(id) > -1)
-            .filter(system => !system.components.every(_component => components.indexOf(_component) > -1))
-            .forEach(system => {
-                systemEntitiesMap.set(system.id, systemEntitiesMap.get(system.id).filter(_id => id !== id));
-                system.onRemove(id);
-            });
-    }
-
-    const onLoop = (delta: number) => {
-        const entityList = entities.getList();
-        entityList.forEach(({ id, components }) => {
-            const currentComponents = (): ComponentEnum[] => entityComponentMap.get(id) || [];
-
-            // added components
-            components
-                .filter(component => currentComponents().indexOf(component) === -1)
-                .forEach(component => {
-                    entityComponentMap.set(id, [...currentComponents(), component]);
-                    onAddComponent(id);
-                });
-
-            // removed components
-            currentComponents()
-                .filter(component => components.indexOf(component) === -1)
-                .forEach(component => {
-                    entityComponentMap.set(id, currentComponents().filter(c => c !== component));
-                    onRemoveComponent(id);
-                });
-        });
-        systems.forEach(system => system?.onLoop && system.onLoop(delta));
-    }
-
-    const getSystemEntityList = (system: SystemEnum) => systemEntitiesMap.get(system);
+    const _system_getEntityList = (system: SystemEnum) => systemEntitiesMap.get(system);
 
     const setSystems = (..._systems: SystemFunction<SystemEnum, ComponentEnum>[]) => {
         const systemList = _systems.map(system => {
             const _system = system({
-                getGame: () => ({
-                    entities,
-                    onLoop,
-                    getSystemEntityList
-                }),
-                getEntityList: () => getSystemEntityList(_system.id)
+                getEntityList: () => _system_getEntityList(_system.id)
             });
             systemEntitiesMap.set(_system.id, []);
             return _system;
@@ -74,10 +21,111 @@ export const game: GameFunction = <SystemEnum, ComponentEnum>() => {
         systems.push(...systemList);
     }
 
+    const _entity_addComponent = (entityId: string, component: ComponentEnum, data: any = {}) => {
+        const entity = getEntity(entityId);
+        if(entity.components.indexOf(component) > -1) return  entity;
+
+        entity.components.push(component);
+        entityDataMap.set(entity.id, {
+            ...entityDataMap.get(entity.id),
+            [component as any]: data
+        });
+
+        systems
+            .filter(system => systemEntitiesMap.get(system.id).indexOf(entityId) === -1)
+            .filter(system => system.components.every(_component => entity.components.indexOf(_component) > -1))
+            .forEach(system => {
+                systemEntitiesMap.set(system.id, [...systemEntitiesMap.get(system.id), entityId]);
+                system?.onAdd && system.onAdd(entityId);
+            });
+        return entity;
+    }
+
+    const _entity_removeComponent = (entityId: string, component: ComponentEnum) => {
+        const entity = getEntity(entityId);
+        entity.components = entity.components.filter(_component => component !== _component);
+
+        systems
+            .filter(system => systemEntitiesMap.get(system.id).indexOf(entityId) > -1)
+            .filter(system => !system.components.every(_component => entity.components.indexOf(_component) > -1))
+            .forEach(system => {
+                systemEntitiesMap.set(system.id, systemEntitiesMap.get(system.id).filter(_id => entityId !== entityId));
+                system.onRemove && system.onRemove(entityId);
+            });
+        return entity;
+    }
+
+    const _entity_updateComponent = (entityId: string, component: ComponentEnum, data: any = {}) => {
+        const entity = getEntity(entityId);
+        if(entity.components.indexOf(component) === -1) return  entity;
+
+        const currentData = entityDataMap.get(entity.id);
+        entityDataMap.set(entity.id, {
+            ...currentData,
+            [component as any]: {...(currentData[component] || {}), ...data}
+        });
+
+        systems
+            .filter(system => systemEntitiesMap.get(system.id).indexOf(entityId) > -1)
+            .forEach(system => system.onUpdate && system.onUpdate(entityId));
+
+        return entity;
+    }
+
+    const _entity_getComponent = (entityId: string, component: ComponentEnum) =>
+        JSON.parse(JSON.stringify(entityDataMap.get(entityId)[component]));
+
+    const _entity_getData = (entityId: string) =>
+        JSON.parse(JSON.stringify(entityDataMap.get(entityId)))
+
+    const getEntityList = (): EntityType<ComponentEnum>[] => [...entityList];
+    const getEntity = (entityId: string) => entityList.find(entity => entity.id === entityId);
+
+    const addEntity = (...entities: EntityType<ComponentEnum>[]) => {
+        entityList.push(
+            ...entities.map(entity => {
+                entity.getData = () => _entity_getData(entity.id);
+                entity.getComponent = (component) => _entity_getComponent(entity.id, component);
+                entity.addComponent = (component, data) => _entity_addComponent(entity.id, component, data);
+                entity.removeComponent = (component) => _entity_removeComponent(entity.id, component);
+                entity.updateComponent = ((component, data) => _entity_updateComponent(entity.id, component, data));
+
+                entityDataMap.set(entity.id, entity.components.reduce((a, b) => ({
+                    ...a,
+                    [b as any]: a[b] || {}
+                }), entity.data));
+
+                return entity;
+            })
+        );
+        entities.forEach(entity => {
+            systems
+                .filter(system => system.components.every(_component => entity.components.indexOf(_component) > -1))
+                .forEach(system => {
+                    systemEntitiesMap.set(system.id, [...systemEntitiesMap.get(system.id), entity.id]);
+                    system.onAdd && system.onAdd(entity.id);
+                });
+        })
+    };
+
+    const removeEntity = (entityId: string) => {
+        const entity = getEntity(entityId);
+        systems
+            .filter(system => systemEntitiesMap.get(system.id).indexOf(entityId) > -1)
+            .filter(system => system.components.every(_component => entity.components.indexOf(_component) > -1))
+            .forEach(system => {
+                systemEntitiesMap.set(system.id, systemEntitiesMap.get(system.id).filter(_id => entityId !== entityId));
+                system.onRemove && system.onRemove(entityId);
+            });
+
+        entityList = entityList.filter(entity => entity.id !== entityId);
+    };
+
     return {
-        entities,
-        onLoop,
         setSystems,
-        getSystemEntityList
+        getEntityList,
+        getEntity,
+        addEntity,
+        removeEntity
     }
 }
