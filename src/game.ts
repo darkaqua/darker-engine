@@ -66,6 +66,8 @@ export const game: GameFunction = <SystemEnum, ComponentEnum>() => {
         });
 
         systems
+            //Only filters the current updated component
+            .filter(system => system.components.indexOf(component) > -1)
             .filter(system => systemEntitiesMap.get(system.id).indexOf(entityId) > -1)
             .forEach(system => system.onUpdate && system.onUpdate(entityId));
 
