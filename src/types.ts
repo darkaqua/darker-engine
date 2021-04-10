@@ -40,6 +40,7 @@ export interface EntityType<ComponentEnum> {
     getData?: () => any;
     getComponent?: (component: ComponentEnum) => any;
     components: ComponentEnum[];
+    hasComponent?: (component: ComponentEnum) => boolean;
     addComponent?: (component: ComponentEnum, data: any) => any;
     removeComponent?: (component: ComponentEnum) => any;
     updateComponent?: (component: ComponentEnum, data: any) => any;

@@ -77,6 +77,9 @@ export const game: GameFunction = <SystemEnum, ComponentEnum>() => {
     const _entity_getComponent = (entityId: string, component: ComponentEnum) =>
         JSON.parse(JSON.stringify(entityDataMap.get(entityId)[component]));
 
+    const _entity_hasComponent = (entityId: string, component: ComponentEnum) =>
+        getEntity(entityId).components.indexOf(component) > -1;
+
     const _entity_getData = (entityId: string) =>
         JSON.parse(JSON.stringify(entityDataMap.get(entityId)))
 
@@ -88,6 +91,7 @@ export const game: GameFunction = <SystemEnum, ComponentEnum>() => {
             ...entities.map(entity => {
                 entity.getData = () => _entity_getData(entity.id);
                 entity.getComponent = (component) => _entity_getComponent(entity.id, component);
+                entity.hasComponent = (component) => _entity_hasComponent(entity.id, component);
                 entity.addComponent = (component, data) => _entity_addComponent(entity.id, component, data);
                 entity.removeComponent = (component) => _entity_removeComponent(entity.id, component);
                 entity.updateComponent = ((component, data) => _entity_updateComponent(entity.id, component, data));
