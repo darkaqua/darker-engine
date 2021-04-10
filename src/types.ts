@@ -20,7 +20,7 @@ export interface SystemType<SystemEnum, ComponentEnum> {
     id: SystemEnum;
     components: ComponentEnum[];
     onAdd?: (id: string) => any;
-    onUpdate?: (id: string) => any;
+    onUpdate?: (id: string, component?: ComponentEnum) => any;
     onRemove?: (id: string) => any;
 }
 
