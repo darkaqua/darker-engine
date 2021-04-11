@@ -115,15 +115,15 @@ export const game: GameFunction = <SystemEnum, ComponentEnum>() => {
     };
 
     const removeEntity = (entityId: string) => {
-        const entity = getEntity(entityId);
         systems
             .filter(system => systemEntitiesMap.get(system.id).indexOf(entityId) > -1)
             .forEach(system => {
-                systemEntitiesMap.set(system.id, systemEntitiesMap.get(system.id).filter(_id => entityId !== entityId));
                 system.onRemove && system.onRemove(entityId);
+                systemEntitiesMap.set(system.id, systemEntitiesMap.get(system.id).filter(_id => entityId !== entityId));
             });
-
-        entityList = entityList.filter(entity => entity.id !== entityId);
+        setTimeout(() => {
+            entityList = entityList.filter(entity => entity.id !== entityId);
+        }, 10);
     };
 
     return {
