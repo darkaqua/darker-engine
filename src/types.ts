@@ -38,12 +38,12 @@ export interface EntityType<ComponentEnum> {
     id: string;
     data: any;
     getData?: () => any;
-    getComponent?: (component: ComponentEnum) => any;
+    getComponent?: <ComponentType>(component: ComponentEnum) => ComponentType;
     components: ComponentEnum[];
     hasComponent?: (component: ComponentEnum) => boolean;
-    addComponent?: (component: ComponentEnum, data: any) => any;
+    addComponent?: <ComponentType>(component: ComponentEnum, data: ComponentType) => any;
     removeComponent?: (component: ComponentEnum) => any;
-    updateComponent?: (component: ComponentEnum, data: any) => any;
+    updateComponent?: <ComponentType>(component: ComponentEnum, data: ComponentType) => any;
 }
 
 export type EntityFunction<ComponentEnum> = (...props: any) => EntityType<ComponentEnum>;
