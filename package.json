@@ -1,7 +1,7 @@
 {
   "name": "darker-engine",
   "description": "ecs lightweight library",
-  "version": "2.3.0",
+  "version": "2.3.1-cjs",
   "author": "darkaqua",
   "license": "MIT",
   "main": "./build/index.js",
@@ -10,6 +10,8 @@
   "scripts": {
     "start:watch": "./node_modules/.bin/nodemon",
     "start": "./node_modules/.bin/ts-node ./src/index.ts",
+    "build:cjs": "yarn run build:cjs:js && yarn run build:dts",
+    "build:cjs:js": "esbuild src/index.ts --bundle --format=cjs --outfile=build/index.js",
     "build": "yarn run build:js && yarn run build:dts",
     "build:js": "esbuild src/index.ts --bundle --format=esm --outfile=build/index.js",
     "build:dts": "tsc src/index.ts --declaration --emitDeclarationOnly --outDir build",
