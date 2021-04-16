@@ -16,6 +16,7 @@ export const game: GameFunction = <ComponentEnum>() => {
             const _system = system({
                 getEntityList: () => _system_getEntityList(systemId)
             });
+            _system._id = systemId;
             systemEntitiesMap.set(systemId, []);
             return _system;
         });
