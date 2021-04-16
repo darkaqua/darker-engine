@@ -2,8 +2,8 @@
 /**
  * Game
  */
-export interface GameType<SystemEnum, ComponentEnum> {
-    setSystems?: (...systems: SystemFunction<SystemEnum, ComponentEnum>[]) => any;
+export interface GameType<ComponentEnum> {
+    setSystems?: (...systems: SystemFunction<ComponentEnum>[]) => any;
     getEntityList?: () => EntityType<ComponentEnum>[],
 
     getEntity?: (id: string) => EntityType<ComponentEnum>,
@@ -11,25 +11,25 @@ export interface GameType<SystemEnum, ComponentEnum> {
     removeEntity?: (id: string) => any
 }
 
-export type GameFunction = <SystemEnum, ComponentEnum>() => GameType<SystemEnum, ComponentEnum>;
+export type GameFunction = <ComponentEnum>() => GameType<ComponentEnum>;
 
 /**
  * System
  */
-export interface SystemType<SystemEnum, ComponentEnum> {
-    id: SystemEnum;
+export interface SystemType<ComponentEnum> {
+    _id?: string;
     components: ComponentEnum[];
     onAdd?: (id: string) => any;
     onUpdate?: (id: string, component?: ComponentEnum) => any;
     onRemove?: (id: string) => any;
 }
 
-export type SystemFunctionProps<SystemEnum, ComponentEnum> = {
+export type SystemFunctionProps<ComponentEnum> = {
     getEntityList?: () => string[];
 }
 
-export type SystemFunction<SystemEnum, ComponentEnum> =
-    (props: SystemFunctionProps<SystemEnum, ComponentEnum>) => SystemType<SystemEnum, ComponentEnum>;
+export type SystemFunction<ComponentEnum> =
+    (props: SystemFunctionProps<ComponentEnum>) => SystemType<ComponentEnum>;
 
 /**
  * Entity

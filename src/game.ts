@@ -1,21 +1,22 @@
 import {EntityType, GameFunction, SystemFunction, SystemType} from "./types";
 
-export const game: GameFunction = <SystemEnum, ComponentEnum>() => {
-    const systems: SystemType<SystemEnum, ComponentEnum>[] = [];
+export const game: GameFunction = <ComponentEnum>() => {
+    const systems: SystemType<ComponentEnum>[] = [];
     let entityList: EntityType<ComponentEnum>[] = [];
     // Contains which components/data has every entity
     const entityDataMap = new Map<string, any>();
     // Contains which entities has every system
-    const systemEntitiesMap = new Map<SystemEnum, string[]>();
+    const systemEntitiesMap = new Map<string, string[]>();
 
-    const _system_getEntityList = (system: SystemEnum) => systemEntitiesMap.get(system);
+    const _system_getEntityList = (systemId: string) => systemEntitiesMap.get(systemId);
 
-    const setSystems = (..._systems: SystemFunction<SystemEnum, ComponentEnum>[]) => {
+    const setSystems = (..._systems: SystemFunction<ComponentEnum>[]) => {
         const systemList = _systems.map(system => {
+            const systemId = `s_${Date.now()}_${Math.trunc(Math.random() * 1000)}`;
             const _system = system({
-                getEntityList: () => _system_getEntityList(_system.id)
+                getEntityList: () => _system_getEntityList(systemId)
             });
-            systemEntitiesMap.set(_system.id, []);
+            systemEntitiesMap.set(systemId, []);
             return _system;
         });
         systems.push(...systemList);
@@ -32,10 +33,10 @@ export const game: GameFunction = <SystemEnum, ComponentEnum>() => {
         });
 
         systems
-            .filter(system => systemEntitiesMap.get(system.id).indexOf(entityId) === -1)
+            .filter(system => systemEntitiesMap.get(system._id).indexOf(entityId) === -1)
             .filter(system => system.components.every(_component => entity.components.indexOf(_component) > -1))
             .forEach(system => {
-                systemEntitiesMap.set(system.id, [...systemEntitiesMap.get(system.id), entityId]);
+                systemEntitiesMap.set(system._id, [...systemEntitiesMap.get(system._id), entityId]);
                 system?.onAdd && system.onAdd(entityId);
             });
         return entity;
@@ -46,10 +47,10 @@ export const game: GameFunction = <SystemEnum, ComponentEnum>() => {
         entity.components = entity.components.filter(_component => component !== _component);
 
         systems
-            .filter(system => systemEntitiesMap.get(system.id).indexOf(entityId) > -1)
+            .filter(system => systemEntitiesMap.get(system._id).indexOf(entityId) > -1)
             .filter(system => !system.components.every(_component => entity.components.indexOf(_component) > -1))
             .forEach(system => {
-                systemEntitiesMap.set(system.id, systemEntitiesMap.get(system.id).filter(_id => entityId !== entityId));
+                systemEntitiesMap.set(system._id, systemEntitiesMap.get(system._id).filter(_id => entityId !== entityId));
                 system.onRemove && system.onRemove(entityId);
             });
         return entity;
@@ -68,7 +69,7 @@ export const game: GameFunction = <SystemEnum, ComponentEnum>() => {
         systems
             //Only filters the current updated component
             .filter(system => system.components.indexOf(component) > -1)
-            .filter(system => systemEntitiesMap.get(system.id).indexOf(entityId) > -1)
+            .filter(system => systemEntitiesMap.get(system._id).indexOf(entityId) > -1)
             .forEach(system => system.onUpdate && system.onUpdate(entityId, component));
 
         return entity;
@@ -108,7 +109,7 @@ export const game: GameFunction = <SystemEnum, ComponentEnum>() => {
             systems
                 .filter(system => system.components.every(_component => entity.components.indexOf(_component) > -1))
                 .forEach(system => {
-                    systemEntitiesMap.set(system.id, [...systemEntitiesMap.get(system.id), entity.id]);
+                    systemEntitiesMap.set(system._id, [...systemEntitiesMap.get(system._id), entity.id]);
                     system.onAdd && system.onAdd(entity.id);
                 });
         })
@@ -116,10 +117,10 @@ export const game: GameFunction = <SystemEnum, ComponentEnum>() => {
 
     const removeEntity = (entityId: string) => {
         systems
-            .filter(system => systemEntitiesMap.get(system.id).indexOf(entityId) > -1)
+            .filter(system => systemEntitiesMap.get(system._id).indexOf(entityId) > -1)
             .forEach(system => {
                 system.onRemove && system.onRemove(entityId);
-                systemEntitiesMap.set(system.id, systemEntitiesMap.get(system.id).filter(_id => entityId !== entityId));
+                systemEntitiesMap.set(system._id, systemEntitiesMap.get(system._id).filter(_id => entityId !== entityId));
             });
         setTimeout(() => {
             entityList = entityList.filter(entity => entity.id !== entityId);
