@@ -50,6 +50,7 @@ export const game: GameFunction = <ComponentEnum>() => {
         systems
             .filter(system => systemEntitiesMap.get(system._id).indexOf(entityId) > -1)
             .filter(system => !system.components.every(_component => entity.components.indexOf(_component) > -1))
+            .reverse()
             .forEach(system => {
                 systemEntitiesMap.set(system._id, systemEntitiesMap.get(system._id).filter(_id => entityId !== entityId));
                 system.onRemove && system.onRemove(entityId);
@@ -119,6 +120,7 @@ export const game: GameFunction = <ComponentEnum>() => {
     const removeEntity = (entityId: string) => {
         systems
             .filter(system => systemEntitiesMap.get(system._id).indexOf(entityId) > -1)
+            .reverse()
             .forEach(system => {
                 system.onRemove && system.onRemove(entityId);
                 systemEntitiesMap.set(system._id, systemEntitiesMap.get(system._id).filter(_id => entityId !== entityId));
