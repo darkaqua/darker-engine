@@ -2,48 +2,48 @@
 /**
  * Game
  */
-export interface GameType<ComponentEnum> {
-    setSystems?: (...systems: SystemFunction<ComponentEnum>[]) => any;
-    getEntityList?: () => EntityType<ComponentEnum>[],
+export interface GameType {
+    setSystems?: (...systems: SystemFunction[]) => any;
+    getEntityList?: () => EntityType[],
 
-    getEntity?: (id: string) => EntityType<ComponentEnum>,
-    addEntity?: (...entities: EntityType<ComponentEnum>[]) => any,
+    getEntity?: (id: string) => EntityType,
+    addEntity?: (...entities: EntityType[]) => any,
     removeEntity?: (id: string) => any
 }
 
-export type GameFunction = <ComponentEnum>() => GameType<ComponentEnum>;
+export type GameFunction = () => GameType;
 
 /**
  * System
  */
-export interface SystemType<ComponentEnum> {
+export interface SystemType {
     _id?: string;
-    components: ComponentEnum[];
+    components: any[];
     onAdd?: (id: string) => any;
-    onUpdate?: (id: string, component?: ComponentEnum) => any;
+    onUpdate?: (id: string, component?: any) => any;
     onRemove?: (id: string) => any;
 }
 
-export type SystemFunctionProps<ComponentEnum> = {
+export type SystemFunctionProps = {
     getEntityList?: () => string[];
 }
 
-export type SystemFunction<ComponentEnum> =
-    (props: SystemFunctionProps<ComponentEnum>) => SystemType<ComponentEnum>;
+export type SystemFunction =
+    (props: SystemFunctionProps) => SystemType;
 
 /**
  * Entity
  */
-export interface EntityType<ComponentEnum> {
+export interface EntityType {
     id: string;
     data: any;
     getData?: () => any;
-    getComponent?: <ComponentType>(component: ComponentEnum) => ComponentType;
-    components: ComponentEnum[];
-    hasComponent?: (component: ComponentEnum) => boolean;
-    addComponent?: <ComponentType>(component: ComponentEnum, data: ComponentType) => any;
-    removeComponent?: (component: ComponentEnum) => any;
-    updateComponent?: <ComponentType>(component: ComponentEnum, data: ComponentType) => any;
+    getComponent?: <ComponentType>(component: any) => ComponentType;
+    components: any[];
+    hasComponent?: (component: any) => boolean;
+    addComponent?: <ComponentType>(component: any, data: ComponentType) => any;
+    removeComponent?: (component: any) => any;
+    updateComponent?: <ComponentType>(component: any, data: ComponentType) => any;
 }
 
-export type EntityFunction<ComponentEnum> = (...props: any) => EntityType<ComponentEnum>;
+export type EntityFunction = (...props: any) => EntityType;

@@ -1,8 +1,8 @@
 import {EntityType, GameFunction, SystemFunction, SystemType} from "./types";
 
-export const game: GameFunction = <ComponentEnum>() => {
-    const systems: SystemType<ComponentEnum>[] = [];
-    let entityList: EntityType<ComponentEnum>[] = [];
+export const game: GameFunction = () => {
+    const systems: SystemType[] = [];
+    let entityList: EntityType[] = [];
     // Contains which components/data has every entity
     const entityDataMap = new Map<string, any>();
     // Contains which entities has every system
@@ -10,7 +10,7 @@ export const game: GameFunction = <ComponentEnum>() => {
 
     const _system_getEntityList = (systemId: string) => systemEntitiesMap.get(systemId);
 
-    const setSystems = (..._systems: SystemFunction<ComponentEnum>[]) => {
+    const setSystems = (..._systems: SystemFunction[]) => {
         const systemList = _systems.map(system => {
             const systemId = `s_${Date.now()}_${Math.trunc(Math.random() * 1000)}`;
             const _system = system({
@@ -23,7 +23,7 @@ export const game: GameFunction = <ComponentEnum>() => {
         systems.push(...systemList);
     }
 
-    const _entity_addComponent = (entityId: string, component: ComponentEnum, data: any = {}) => {
+    const _entity_addComponent = (entityId: string, component: any, data: any = {}) => {
         const entity = getEntity(entityId);
         if(entity.components.indexOf(component) > -1) return  entity;
 
@@ -43,7 +43,7 @@ export const game: GameFunction = <ComponentEnum>() => {
         return entity;
     }
 
-    const _entity_removeComponent = (entityId: string, component: ComponentEnum) => {
+    const _entity_removeComponent = (entityId: string, component: any) => {
         const entity = getEntity(entityId);
         entity.components = entity.components.filter(_component => component !== _component);
 
@@ -58,7 +58,7 @@ export const game: GameFunction = <ComponentEnum>() => {
         return entity;
     }
 
-    const _entity_updateComponent = (entityId: string, component: ComponentEnum, data: any = {}) => {
+    const _entity_updateComponent = (entityId: string, component: any, data: any = {}) => {
         const entity = getEntity(entityId);
         if(entity.components.indexOf(component) === -1) return  entity;
 
@@ -77,19 +77,19 @@ export const game: GameFunction = <ComponentEnum>() => {
         return entity;
     }
 
-    const _entity_getComponent = (entityId: string, component: ComponentEnum) =>
+    const _entity_getComponent = (entityId: string, component: any) =>
         JSON.parse(JSON.stringify(entityDataMap.get(entityId)[component]));
 
-    const _entity_hasComponent = (entityId: string, component: ComponentEnum) =>
+    const _entity_hasComponent = (entityId: string, component: any) =>
         getEntity(entityId).components.indexOf(component) > -1;
 
     const _entity_getData = (entityId: string) =>
-        JSON.parse(JSON.stringify(entityDataMap.get(entityId)))
+        JSON.parse(JSON.stringify(entityDataMap.get(entityId)));
 
-    const getEntityList = (): EntityType<ComponentEnum>[] => [...entityList];
+    const getEntityList = (): EntityType[] => [...entityList];
     const getEntity = (entityId: string) => entityList.find(entity => entity.id === entityId);
 
-    const addEntity = (...entities: EntityType<ComponentEnum>[]) => {
+    const addEntity = (...entities: EntityType[]) => {
         entityList.push(
             ...entities.map(entity => {
                 entity.getData = () => _entity_getData(entity.id);
