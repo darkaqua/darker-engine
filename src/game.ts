@@ -125,9 +125,7 @@ export const game: GameFunction = () => {
                 system.onRemove && system.onRemove(entityId);
                 systemEntitiesMap.set(system._id, systemEntitiesMap.get(system._id).filter(_id => entityId !== entityId));
             });
-        setTimeout(() => {
-            entityList = entityList.filter(entity => entity.id !== entityId);
-        }, 10);
+        entityList = entityList.filter(entity => entity.id !== entityId);
     };
 
     return {
