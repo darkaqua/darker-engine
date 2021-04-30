@@ -117,15 +117,17 @@ export const game: GameFunction = () => {
         })
     };
 
-    const removeEntity = (entityId: string) => {
-        systems
-            .filter(system => systemEntitiesMap.get(system._id).indexOf(entityId) > -1)
-            .reverse()
-            .forEach(system => {
-                system.onRemove && system.onRemove(entityId);
-                systemEntitiesMap.set(system._id, systemEntitiesMap.get(system._id).filter(_id => entityId !== entityId));
-            });
-        entityList = entityList.filter(entity => entity.id !== entityId);
+    const removeEntity = (...entityIdList: string[]) => {
+        entityIdList.forEach(entityId => {
+            systems
+                .filter(system => systemEntitiesMap.get(system._id).indexOf(entityId) > -1)
+                .reverse()
+                .forEach(system => {
+                    system.onRemove && system.onRemove(entityId);
+                    systemEntitiesMap.set(system._id, systemEntitiesMap.get(system._id).filter(_id => entityId !== entityId));
+                });
+        });
+        entityList = entityList.filter(entity => entityIdList.indexOf(entity.id) === -1);
     };
 
     return {
