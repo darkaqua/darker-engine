@@ -8,7 +8,7 @@ export interface GameType {
 
     getEntity?: (id: string) => EntityType,
     addEntity?: (...entities: EntityType[]) => any,
-    removeEntity?: (id: string) => any
+    removeEntity?: (...idList: string[]) => any
 }
 
 export type GameFunction = () => GameType;
