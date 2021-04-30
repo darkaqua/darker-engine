@@ -124,7 +124,7 @@ export const game: GameFunction = () => {
                 .reverse()
                 .forEach(system => {
                     system.onRemove && system.onRemove(entityId);
-                    systemEntitiesMap.set(system._id, systemEntitiesMap.get(system._id).filter(_id => entityId !== entityId));
+                    systemEntitiesMap.set(system._id, systemEntitiesMap.get(system._id).filter(_id => _id !== entityId));
                 });
         });
         entityList = entityList.filter(entity => entityIdList.indexOf(entity.id) === -1);
