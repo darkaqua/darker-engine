@@ -23,26 +23,6 @@ export const game: GameFunction = () => {
         systems.push(...systemList);
     }
 
-    const _entity_addComponent = (entityId: string, component: any, data: any = {}) => {
-        const entity = getEntity(entityId);
-        if(entity.components.indexOf(component) > -1) return  entity;
-
-        entity.components.push(component);
-        entityDataMap.set(entity.id, {
-            ...entityDataMap.get(entity.id),
-            [component as any]: data
-        });
-
-        systems
-            .filter(system => systemEntitiesMap.get(system._id).indexOf(entityId) === -1)
-            .filter(system => system.components.every(_component => entity.components.indexOf(_component) > -1))
-            .forEach(system => {
-                systemEntitiesMap.set(system._id, [...systemEntitiesMap.get(system._id), entityId]);
-                system?.onAdd && system.onAdd(entityId);
-            });
-        return entity;
-    }
-
     const _entity_removeComponent = (entityId: string, component: any) => {
         const entity = getEntity(entityId);
         entity.components = entity.components.filter(_component => component !== _component);
@@ -60,7 +40,8 @@ export const game: GameFunction = () => {
 
     const _entity_updateComponent = (entityId: string, component: any, data: any = {}) => {
         const entity = getEntity(entityId);
-        if(entity.components.indexOf(component) === -1) return  entity;
+        if(entity.components.indexOf(component) === -1)
+            return _entity_addComponent(entityId, component, data);
 
         const currentData = entityDataMap.get(entity.id);
         entityDataMap.set(entity.id, {
@@ -74,6 +55,26 @@ export const game: GameFunction = () => {
             .filter(system => systemEntitiesMap.get(system._id).indexOf(entityId) > -1)
             .forEach(system => system.onUpdate && system.onUpdate(entityId, component));
 
+        return entity;
+    }
+
+    const _entity_addComponent = (entityId: string, component: any, data: any = {}) => {
+        const entity = getEntity(entityId);
+        if(entity.components.indexOf(component) > -1) return  entity;
+
+        entity.components.push(component);
+        entityDataMap.set(entity.id, {
+            ...entityDataMap.get(entity.id),
+            [component as any]: data
+        });
+
+        systems
+            .filter(system => systemEntitiesMap.get(system._id).indexOf(entityId) === -1)
+            .filter(system => system.components.every(_component => entity.components.indexOf(_component) > -1))
+            .forEach(system => {
+                systemEntitiesMap.set(system._id, [...systemEntitiesMap.get(system._id), entityId]);
+                system?.onAdd && system.onAdd(entityId);
+            });
         return entity;
     }
 
@@ -95,7 +96,6 @@ export const game: GameFunction = () => {
                 entity.getData = () => _entity_getData(entity.id);
                 entity.getComponent = (component) => _entity_getComponent(entity.id, component);
                 entity.hasComponent = (component) => _entity_hasComponent(entity.id, component);
-                entity.addComponent = (component, data) => _entity_addComponent(entity.id, component, data);
                 entity.removeComponent = (component) => _entity_removeComponent(entity.id, component);
                 entity.updateComponent = ((component, data) => _entity_updateComponent(entity.id, component, data));
 

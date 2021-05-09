@@ -41,7 +41,6 @@ export interface EntityType {
     getComponent?: <ComponentType>(component: any) => ComponentType;
     components: any[];
     hasComponent?: (component: any) => boolean;
-    addComponent?: <ComponentType>(component: any, data: ComponentType) => any;
     removeComponent?: (component: any) => any;
     updateComponent?: <ComponentType>(component: any, data: ComponentType) => any;
 }
