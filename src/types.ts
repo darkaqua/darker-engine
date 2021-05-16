@@ -28,7 +28,7 @@ export type SystemFunctionProps = {
     getEntityList?: () => string[];
 }
 
-export type SystemFunction<T> =
+export type SystemFunction<T = {}> =
     (props: SystemFunctionProps) => SystemType & T;
 
 /**
