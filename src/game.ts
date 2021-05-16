@@ -10,7 +10,7 @@ export const game: GameFunction = () => {
 
     const _system_getEntityList = (systemId: string) => systemEntitiesMap.get(systemId);
 
-    const setSystems = (..._systems: SystemFunction<any>[]) => {
+    const setSystems = (..._systems: SystemFunction[]) => {
         const systemList = _systems.map(system => {
             const _system = system({
                 getEntityList: () => _system_getEntityList(system.name)
