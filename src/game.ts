@@ -77,14 +77,16 @@ export const game: GameFunction = () => {
         return entity;
     }
 
-    const _entity_getComponent = (entityId: string, component: any) =>
-        JSON.parse(JSON.stringify(entityDataMap.get(entityId)[component]));
+    const _entity_getComponent = (entityId: string, component: any) => {
+        const entity = entityDataMap.get(entityId);
+        return JSON.parse(JSON.stringify(entity ? (entity[component] || {}) : {}));
+    }
 
     const _entity_hasComponent = (entityId: string, component: any) =>
         getEntity(entityId).components.indexOf(component) > -1;
 
     const _entity_getData = (entityId: string) =>
-        JSON.parse(JSON.stringify(entityDataMap.get(entityId)));
+        JSON.parse(JSON.stringify(entityDataMap.get(entityId) || {}));
 
     const getEntityList = (): EntityType[] => [...entityList];
     const getEntity = (entityId: string) => entityList.find(entity => entity.id === entityId);
