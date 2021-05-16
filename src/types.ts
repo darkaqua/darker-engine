@@ -3,7 +3,7 @@
  * Game
  */
 export interface GameType {
-    setSystems?: (...systems: SystemFunction[]) => any;
+    setSystems?: (...systems: SystemFunction<any>[]) => any;
     getEntityList?: () => EntityType[],
 
     getEntity?: (id: string) => EntityType,
@@ -28,8 +28,8 @@ export type SystemFunctionProps = {
     getEntityList?: () => string[];
 }
 
-export type SystemFunction =
-    (props: SystemFunctionProps) => SystemType;
+export type SystemFunction<T> =
+    (props: SystemFunctionProps) => SystemType & T;
 
 /**
  * Entity

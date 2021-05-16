@@ -10,14 +10,13 @@ export const game: GameFunction = () => {
 
     const _system_getEntityList = (systemId: string) => systemEntitiesMap.get(systemId);
 
-    const setSystems = (..._systems: SystemFunction[]) => {
+    const setSystems = (..._systems: SystemFunction<any>[]) => {
         const systemList = _systems.map(system => {
-            const systemId = `s_${Date.now()}_${Math.trunc(Math.random() * 1000)}`;
             const _system = system({
-                getEntityList: () => _system_getEntityList(systemId)
+                getEntityList: () => _system_getEntityList(system.name)
             });
-            _system._id = systemId;
-            systemEntitiesMap.set(systemId, []);
+            _system._id = system.name;
+            systemEntitiesMap.set(system.name, []);
             return _system;
         });
         systems.push(...systemList);
@@ -130,11 +129,14 @@ export const game: GameFunction = () => {
         entityList = entityList.filter(entity => entityIdList.indexOf(entity.id) === -1);
     };
 
+    const getSystem = (name: string) => systems.find(system => system._id === name);
+
     return {
         setSystems,
         getEntityList,
         getEntity,
         addEntity,
-        removeEntity
+        removeEntity,
+        getSystem
     }
 }
