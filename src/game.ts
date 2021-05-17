@@ -12,11 +12,15 @@ export const game: GameFunction = () => {
 
     const setSystems = (..._systems: SystemFunction[]) => {
         const systemList = _systems.map(system => {
+            let systemId = `SYSTEM_${Date.now()}_${Math.trunc(Math.random() * 1000)}`
             const _system = system({
-                getEntityList: () => _system_getEntityList(system.name)
+                getEntityList: () => _system_getEntityList(systemId)
             });
-            _system._id = system.name;
-            systemEntitiesMap.set(system.name, []);
+            // Sets id if declared
+            if(_system._id)
+                systemId = _system._id;
+            _system._id = systemId;
+            systemEntitiesMap.set(systemId, []);
             return _system;
         });
         systems.push(...systemList);
@@ -78,15 +82,16 @@ export const game: GameFunction = () => {
     }
 
     const _entity_getComponent = (entityId: string, component: any) => {
-        const entity = entityDataMap.get(entityId);
-        return JSON.parse(JSON.stringify(entity ? (entity[component] || {}) : {}));
+        const entityData = entityDataMap.get(entityId);
+        return entityData && entityData[component]
+            ? JSON.parse(JSON.stringify(entityData[component])) : {};
     }
 
     const _entity_hasComponent = (entityId: string, component: any) =>
         getEntity(entityId).components.indexOf(component) > -1;
 
     const _entity_getData = (entityId: string) =>
-        JSON.parse(JSON.stringify(entityDataMap.get(entityId) || {}));
+        JSON.parse(JSON.stringify(entityDataMap.get(entityId)));
 
     const getEntityList = (): EntityType[] => [...entityList];
     const getEntity = (entityId: string) => entityList.find(entity => entity.id === entityId);
