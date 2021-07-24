@@ -31,8 +31,8 @@ export const game: GameFunction = () => {
         entity.components = entity.components.filter(_component => component !== _component);
 
         systems
-            .filter(system => systemEntitiesMap.get(system._id).indexOf(entityId) > -1)
-            .filter(system => !system.components.every(_component => entity.components.indexOf(_component) > -1))
+            .filter(system => systemEntitiesMap.get(system._id).includes(entityId))
+            .filter(system => !system.components.every(_component => entity.components.includes(_component)))
             .reverse()
             .forEach(system => {
                 systemEntitiesMap.set(system._id, systemEntitiesMap.get(system._id).filter(_id => entityId !== entityId));
@@ -43,7 +43,7 @@ export const game: GameFunction = () => {
 
     const _entity_updateComponent = (entityId: string, component: any, data: any = {}) => {
         const entity = getEntity(entityId);
-        if(entity.components.indexOf(component) === -1)
+        if(!entity.components.includes(component))
             return _entity_addComponent(entityId, component, data);
 
         const currentData = entityDataMap.get(entity.id);
@@ -54,8 +54,8 @@ export const game: GameFunction = () => {
 
         systems
             //Only filters the current updated component
-            .filter(system => system.components.indexOf(component) > -1)
-            .filter(system => systemEntitiesMap.get(system._id).indexOf(entityId) > -1)
+            .filter(system => system.components.includes(component))
+            .filter(system => systemEntitiesMap.get(system._id).includes(entityId))
             .forEach(system => system.onUpdate && system.onUpdate(entityId, component));
 
         return entity;
@@ -63,7 +63,6 @@ export const game: GameFunction = () => {
 
     const _entity_addComponent = (entityId: string, component: any, data: any = {}) => {
         const entity = getEntity(entityId);
-        if(entity.components.indexOf(component) > -1) return  entity;
 
         entity.components.push(component);
         entityDataMap.set(entity.id, {
@@ -72,8 +71,11 @@ export const game: GameFunction = () => {
         });
 
         systems
-            .filter(system => systemEntitiesMap.get(system._id).indexOf(entityId) === -1)
-            .filter(system => system.components.every(_component => entity.components.indexOf(_component) > -1))
+            .filter(system => system.components.includes(component))
+            // Cuando los sistemas no contengan la entidad actual
+            .filter(system => !systemEntitiesMap.get(system._id).includes(entityId))
+            // Cuando la entidad tenga los componentes correspondientes a ese sistema
+            .filter(system => system.components.every(_component => entity.components.includes(_component)))
             .forEach(system => {
                 systemEntitiesMap.set(system._id, [...systemEntitiesMap.get(system._id), entityId]);
                 system?.onAdd && system.onAdd(entityId);
@@ -88,7 +90,7 @@ export const game: GameFunction = () => {
     }
 
     const _entity_hasComponent = (entityId: string, component: any) =>
-        getEntity(entityId).components.indexOf(component) > -1;
+        getEntity(entityId).components.includes(component);
 
     const _entity_getData = (entityId: string) =>
         JSON.parse(JSON.stringify(entityDataMap.get(entityId)));
@@ -115,7 +117,7 @@ export const game: GameFunction = () => {
         );
         entities.forEach(entity => {
             systems
-                .filter(system => system.components.every(_component => entity.components.indexOf(_component) > -1))
+                .filter(system => system.components.every(_component => entity.components.includes(_component)))
                 .forEach(system => {
                     systemEntitiesMap.set(system._id, [...systemEntitiesMap.get(system._id), entity.id]);
                     system.onAdd && system.onAdd(entity.id);
@@ -126,14 +128,14 @@ export const game: GameFunction = () => {
     const removeEntity = (...entityIdList: string[]) => {
         entityIdList.forEach(entityId => {
             systems
-                .filter(system => systemEntitiesMap.get(system._id).indexOf(entityId) > -1)
+                .filter(system => systemEntitiesMap.get(system._id).includes(entityId))
                 .reverse()
                 .forEach(system => {
                     system.onRemove && system.onRemove(entityId);
                     systemEntitiesMap.set(system._id, systemEntitiesMap.get(system._id).filter(_id => _id !== entityId));
                 });
         });
-        entityList = entityList.filter(entity => entityIdList.indexOf(entity.id) === -1);
+        entityList = entityList.filter(entity => !entityIdList.includes(entity.id));
     };
 
     const getSystem = (name: string) => systems.find(system => system._id === name);
