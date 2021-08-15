@@ -9,18 +9,32 @@ export const game: GameFunction = () => {
     const systemEntitiesMap = new Map<string, string[]>();
 
     const _system_getEntityList = (systemId: string) => systemEntitiesMap.get(systemId);
+    const _system_getData = (systemId: string): any =>
+        systems.find(_system => _system._id === systemId)._data;
+    const _system_setData = (systemId: string, data: any) =>
+        systems.find(_system => _system._id === systemId)._data = data;
+    const _system_updateData = (systemId: string, data: any) => {
+        const system = systems.find(_system => _system._id === systemId);
+        system._data = { ...system._data, ...data };
+    }
 
     const setSystems = (..._systems: SystemFunction[]) => {
         const systemList = _systems.map(system => {
             let systemId = `SYSTEM_${Date.now()}_${Math.trunc(Math.random() * 1000)}`
             const _system = system({
-                getEntityList: () => _system_getEntityList(systemId)
+                getEntityList: () => _system_getEntityList(systemId),
+                getData: () => _system_getData(systemId),
+                setData: (data: any) => _system_setData(systemId, data),
+                updateData: (data: any) => _system_updateData(systemId, data)
             });
             // Sets id if declared
             if(_system._id)
                 systemId = _system._id;
             _system._id = systemId;
+            _system._data = {};
+            
             systemEntitiesMap.set(systemId, []);
+            
             return _system;
         });
         systems.push(...systemList);
