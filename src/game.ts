@@ -26,7 +26,7 @@ export const game: GameFunction = () => {
     }
     const _system_addDataListener = (systemId: string, callback: any): number => {
         const system = systems.find(_system => _system._id === systemId);
-        return system._dataListenerList.push(callback);
+        return system._dataListenerList.push(callback) - 1;
     }
     const _system_removeDataListener = (systemId: string, index: number) => {
         const system = systems.find(_system => _system._id === systemId);
