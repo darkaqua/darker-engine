@@ -29,7 +29,7 @@ export interface SystemType {
     _data?: any;
     _dataListenerList?: any[];
     
-    getData?: () => any;
+    getData?: <DataType>() => DataType;
     updateData?: (data: any) => void;
     
     addDataListener?: (callback: (data: any) => any) => number;
@@ -39,8 +39,8 @@ export interface SystemType {
 export type SystemFunctionProps = {
     getEntityList?: () => string[];
     
-    getData?: () => any;
-    updateData?: (data: any) => void;
+    getData?: <DataType>() => DataType;
+    updateData?: <DataType>(data: DataType) => void;
 }
 
 export type SystemFunction =
