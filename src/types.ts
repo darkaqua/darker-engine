@@ -30,7 +30,7 @@ export interface SystemType {
     _dataListenerList?: any[];
     
     getData?: <DataType>() => DataType;
-    updateData?: (data: any) => void;
+    updateData?: <DataType>(data: DataType) => void;
     
     addDataListener?: (callback: (data: any) => any) => number;
     removeDataListener?: (id: number) => any;
