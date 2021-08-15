@@ -8,14 +8,29 @@ export const game: GameFunction = () => {
     // Contains which entities has every system
     const systemEntitiesMap = new Map<string, string[]>();
 
+    // Gets the entity list from current system
     const _system_getEntityList = (systemId: string) => systemEntitiesMap.get(systemId);
+    // Gets the data from current system
     const _system_getData = (systemId: string): any =>
         systems.find(_system => _system._id === systemId)._data;
-    const _system_setData = (systemId: string, data: any) =>
-        systems.find(_system => _system._id === systemId)._data = data;
+    // Updates the data from current system
     const _system_updateData = (systemId: string, data: any) => {
         const system = systems.find(_system => _system._id === systemId);
-        system._data = { ...system._data, ...data };
+        system._data = !data ? data : { ...system._data, ...data };
+        // call callback subscriptions
+        system._dataListenerList
+            .filter((value) => !!value)
+            .forEach((value) => value(system._data));
+        
+        if(system.onDataUpdate) system.onDataUpdate(data);
+    }
+    const _system_addDataListener = (systemId: string, callback: any): number => {
+        const system = systems.find(_system => _system._id === systemId);
+        return system._dataListenerList.push(callback);
+    }
+    const _system_removeDataListener = (systemId: string, index: number) => {
+        const system = systems.find(_system => _system._id === systemId);
+        return system._dataListenerList[index] = null;
     }
 
     const setSystems = (..._systems: SystemFunction[]) => {
@@ -24,14 +39,21 @@ export const game: GameFunction = () => {
             const _system = system({
                 getEntityList: () => _system_getEntityList(systemId),
                 getData: () => _system_getData(systemId),
-                setData: (data: any) => _system_setData(systemId, data),
                 updateData: (data: any) => _system_updateData(systemId, data)
             });
             // Sets id if declared
             if(_system._id)
                 systemId = _system._id;
             _system._id = systemId;
+            
+            //data things
             _system._data = {};
+            _system.getData = () => _system_getData(systemId);
+            _system.updateData = (data: any) => _system_updateData(systemId, data);
+            
+            _system._dataListenerList = [];
+            _system.addDataListener = (callback: any): number => _system_addDataListener(systemId, callback);
+            _system.removeDataListener = (index: number) => _system_removeDataListener(systemId, index);
             
             systemEntitiesMap.set(systemId, []);
             

@@ -24,14 +24,22 @@ export interface SystemType {
     onAdd?: (id: string) => any;
     onUpdate?: (id: string, component?: any) => any;
     onRemove?: (id: string) => any;
+    onDataUpdate?: <Data>(data: Data) => any;
     
-    _data?: any;
+    _data: any;
+    _dataListenerList: any[];
+    
+    getData: <Data>() => Data;
+    updateData: <Data>(data: Data) => void;
+    
+    addDataListener: (callback: <Data>(data: Data) => any) => number;
+    removeDataListener: (id: number) => any;
 }
 
 export type SystemFunctionProps = {
     getEntityList?: () => string[];
+    
     getData?: <Data>() => Data;
-    setData?: <Data>(data: Data) => void;
     updateData?: <Data>(data: Data) => void;
 }
 
