@@ -7,7 +7,7 @@ export interface GameType {
     getEntityList?: () => EntityType[],
 
     getEntity?: (id: string) => EntityType,
-    addEntity?: (...entities: EntityType[]) => any,
+    addEntity?: (...entities: EntityType[]) => EntityType[],
     removeEntity?: (...idList: string[]) => any
 
     getSystem?: (name: string) => SystemType;

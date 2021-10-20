@@ -141,7 +141,7 @@ export const game: GameFunction = () => {
     const getEntityList = (): EntityType[] => [...entityList];
     const getEntity = (entityId: string) => entityList.find(entity => entity.id === entityId);
 
-    const addEntity = (...entities: EntityType[]) => {
+    const addEntity = (...entities: EntityType[]): EntityType[] => {
         entityList.push(
             ...entities.map(entity => {
                 entity.getData = () => _entity_getData(entity.id);
@@ -177,7 +177,8 @@ export const game: GameFunction = () => {
                     systemEntitiesMap.set(system._id, [...systemEntitiesMap.get(system._id), entity.id]);
                     system.onAdd && system.onAdd(entity.id);
                 });
-        })
+        });
+        return entities;
     };
 
     const removeEntity = (...entityIdList: string[]) => {
