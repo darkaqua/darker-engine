@@ -59,12 +59,12 @@ export interface EntityType {
     updateComponent?: UpdateComponentFunctionType;
     removeComponent?: RemoveComponentFunctionType;
     // listeners
-    _updateListenerList: any[];
-    _removeListenerList: any[];
-    addUpdateComponentListener: (callback: UpdateComponentFunctionType) => number;
-    addRemoveComponentListener: (callback: RemoveComponentFunctionType) => number;
-    removeUpdateComponentListener: (id: number) => any;
-    removeRemoveComponentListener: (id: number) => any;
+    _updateListenerList?: any[];
+    _removeListenerList?: any[];
+    addUpdateComponentListener?: (callback: UpdateComponentFunctionType) => number;
+    addRemoveComponentListener?: (callback: RemoveComponentFunctionType) => number;
+    removeUpdateComponentListener?: (id: number) => any;
+    removeRemoveComponentListener?: (id: number) => any;
 }
 
 export type UpdateComponentFunctionType = <ComponentType>(component: any, data: ComponentType) => any;
