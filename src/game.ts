@@ -7,6 +7,8 @@ export const game: GameFunction = () => {
     const entityDataMap = new Map<string, any>();
     // Contains which entities has every system
     const systemEntitiesMap = new Map<string, string[]>();
+    let isLoad: boolean = false;
+    const loadListenerList = [];
 
     // Gets the entity list from current system
     const _system_getEntityList = (systemId: string) => systemEntitiesMap.get(systemId);
@@ -196,12 +198,23 @@ export const game: GameFunction = () => {
 
     const getSystem = (name: string) => systems.find(system => system._id === name);
 
+    const load = () => {
+        loadListenerList.forEach(callback => callback());
+        isLoad = true;
+    }
+    const onLoad = (callback: () => any) => {
+        loadListenerList.push(callback);
+        if(isLoad) callback();
+    }
+    
     return {
         setSystems,
         getEntityList,
         getEntity,
         addEntity,
         removeEntity,
-        getSystem
+        getSystem,
+        load,
+        onLoad
     }
 }

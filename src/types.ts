@@ -11,6 +11,9 @@ export interface GameType {
     removeEntity?: (...idList: string[]) => any
 
     getSystem?: (name: string) => SystemType;
+    
+    load?: () => any;
+    onLoad?: (callback: () => any) => any;
 }
 
 export type GameFunction = () => GameType;
