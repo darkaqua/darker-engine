@@ -1,4 +1,4 @@
-import {EntityType, GameFunction, SystemFunction, SystemType} from "./types";
+import {EntityType, GameFunction, SystemFunction, SystemType, UpdateComponentFunctionType} from "./types";
 
 export const game: GameFunction = () => {
     const systems: SystemType[] = [];
@@ -11,35 +11,35 @@ export const game: GameFunction = () => {
     // Gets the entity list from current system
     const _system_getEntityList = (systemId: string) => systemEntitiesMap.get(systemId);
     // Gets the data from current system
-    const _system_getData = (systemId: string): any =>
-        systems.find(_system => _system._id === systemId)._data;
+    // const _system_getData = (systemId: string): any =>
+    //     systems.find(_system => _system._id === systemId)._data;
     // Updates the data from current system
-    const _system_updateData = (systemId: string, data: any) => {
-        const system = systems.find(_system => _system._id === systemId);
-        system._data = !data ? data : { ...system._data, ...data };
-        // call callback subscriptions
-        system._dataListenerList
-            .filter((value) => !!value)
-            .forEach((value) => value(system._data));
-        
-        if(system.onDataUpdate) system.onDataUpdate(data);
-    }
-    const _system_addDataListener = (systemId: string, callback: any): number => {
-        const system = systems.find(_system => _system._id === systemId);
-        return system._dataListenerList.push(callback) - 1;
-    }
-    const _system_removeDataListener = (systemId: string, index: number) => {
-        const system = systems.find(_system => _system._id === systemId);
-        return system._dataListenerList[index] = null;
-    }
+    // const _system_updateData = (systemId: string, data: any) => {
+    //     const system = systems.find(_system => _system._id === systemId);
+    //     system._data = !data ? data : { ...system._data, ...data };
+    //     // call callback subscriptions
+    //     system._dataListenerList
+    //         .filter((value) => !!value)
+    //         .forEach((value) => value(system._data));
+    //
+    //     if(system.onDataUpdate) system.onDataUpdate(data);
+    // }
+    // const _system_addDataListener = (systemId: string, callback: any): number => {
+    //     const system = systems.find(_system => _system._id === systemId);
+    //     return system._dataListenerList.push(callback) - 1;
+    // }
+    // const _system_removeDataListener = (systemId: string, index: number) => {
+    //     const system = systems.find(_system => _system._id === systemId);
+    //     return system._dataListenerList[index] = null;
+    // }
 
     const setSystems = (..._systems: SystemFunction[]) => {
         const systemList = _systems.map(system => {
             let systemId = `SYSTEM_${Date.now()}_${Math.trunc(Math.random() * 1000)}`
             const _system = system({
                 getEntityList: () => _system_getEntityList(systemId),
-                getData: () => _system_getData(systemId),
-                updateData: (data: any) => _system_updateData(systemId, data)
+                // getData: () => _system_getData(systemId),
+                // updateData: (data: any) => _system_updateData(systemId, data)
             });
             // Sets id if declared
             if(_system._id)
@@ -47,13 +47,13 @@ export const game: GameFunction = () => {
             _system._id = systemId;
             
             //data things
-            _system._data = {};
-            _system.getData = () => _system_getData(systemId);
-            _system.updateData = (data: any) => _system_updateData(systemId, data);
-            
-            _system._dataListenerList = [];
-            _system.addDataListener = (callback: any): number => _system_addDataListener(systemId, callback);
-            _system.removeDataListener = (index: number) => _system_removeDataListener(systemId, index);
+            // _system._data = {};
+            // _system.getData = () => _system_getData(systemId);
+            // _system.updateData = (data: any) => _system_updateData(systemId, data);
+            //
+            // _system._dataListenerList = [];
+            // _system.addDataListener = (callback: any): number => _system_addDataListener(systemId, callback);
+            // _system.removeDataListener = (index: number) => _system_removeDataListener(systemId, index);
             
             systemEntitiesMap.set(systemId, []);
             
@@ -74,6 +74,10 @@ export const game: GameFunction = () => {
                 systemEntitiesMap.set(system._id, systemEntitiesMap.get(system._id).filter(_id => entityId !== entityId));
                 system.onRemove && system.onRemove(entityId);
             });
+    
+        // call the listeners
+        entity._removeListenerList.filter(c => c).forEach(callback => callback(component));
+        
         return entity;
     }
 
@@ -93,6 +97,9 @@ export const game: GameFunction = () => {
             .filter(system => system.components.includes(component))
             .filter(system => systemEntitiesMap.get(system._id).includes(entityId))
             .forEach(system => system.onUpdate && system.onUpdate(entityId, component));
+        
+        // call the listeners
+        entity._updateListenerList.filter(c => c).forEach(callback => callback(component, data));
 
         return entity;
     }
@@ -142,7 +149,19 @@ export const game: GameFunction = () => {
                 entity.hasComponent = (component) => _entity_hasComponent(entity.id, component);
                 entity.removeComponent = (component) => _entity_removeComponent(entity.id, component);
                 entity.updateComponent = ((component, data) => _entity_updateComponent(entity.id, component, data));
-
+                
+                // listeners
+                entity._updateListenerList = [];
+                entity._removeListenerList = [];
+                entity.addUpdateComponentListener = (callback: UpdateComponentFunctionType) =>
+                    entity._updateListenerList.push(callback);
+                entity.addRemoveComponentListener = (callback: UpdateComponentFunctionType) =>
+                    entity._updateListenerList.push(callback);
+                entity.removeUpdateComponentListener = (id: number) =>
+                    entity._updateListenerList = entity._updateListenerList.filter((_, index) => id !== index);
+                entity.removeRemoveComponentListener = (id: number) =>
+                    entity._removeListenerList = entity._removeListenerList.filter((_, index) => id !== index);
+                
                 entityDataMap.set(entity.id, entity.components.reduce((a, b) => ({
                     ...a,
                     [b as any]: a[b] || {}

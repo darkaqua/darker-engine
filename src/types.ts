@@ -24,23 +24,23 @@ export interface SystemType {
     onAdd?: (id: string) => any;
     onUpdate?: (id: string, component?: any) => any;
     onRemove?: (id: string) => any;
-    onDataUpdate?: (data: any) => any;
+    // onDataUpdate?: (data: any) => any;
     
-    _data?: any;
-    _dataListenerList?: any[];
-    
-    getData?: <DataType>() => DataType;
-    updateData?: <DataType>(data: DataType) => void;
-    
-    addDataListener?: (callback: (data: any) => any) => number;
-    removeDataListener?: (id: number) => any;
+    // _data?: any;
+    // _dataListenerList?: any[];
+    //
+    // getData?: <DataType>() => DataType;
+    // updateData?: <DataType>(data: DataType) => void;
+    //
+    // addDataListener?: (callback: (data: any) => any) => number;
+    // removeDataListener?: (id: number) => any;
 }
 
 export type SystemFunctionProps = {
     getEntityList?: () => string[];
     
-    getData?: <DataType>() => DataType;
-    updateData?: <DataType>(data: DataType) => void;
+    // getData?: <DataType>() => DataType;
+    // updateData?: <DataType>(data: DataType) => void;
 }
 
 export type SystemFunction =
@@ -56,8 +56,18 @@ export interface EntityType {
     getComponent?: <ComponentType>(component: any) => ComponentType;
     components: any[];
     hasComponent?: (component: any) => boolean;
-    removeComponent?: (component: any) => any;
-    updateComponent?: <ComponentType>(component: any, data: ComponentType) => any;
+    updateComponent?: UpdateComponentFunctionType;
+    removeComponent?: RemoveComponentFunctionType;
+    // listeners
+    _updateListenerList: any[];
+    _removeListenerList: any[];
+    addUpdateComponentListener: (callback: UpdateComponentFunctionType) => number;
+    addRemoveComponentListener: (callback: RemoveComponentFunctionType) => number;
+    removeUpdateComponentListener: (id: number) => any;
+    removeRemoveComponentListener: (id: number) => any;
 }
+
+export type UpdateComponentFunctionType = <ComponentType>(component: any, data: ComponentType) => any;
+export type RemoveComponentFunctionType = (component: any) => any;
 
 export type EntityFunction = (...props: any) => EntityType;
