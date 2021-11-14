@@ -173,8 +173,18 @@ export const game: GameFunction = () => {
             })
         );
         entities.forEach(entity => {
+            // Calculate points from component order.
+            const componentMapPoint = entity.components.reduce((obj, com, ind) => ({ ...obj, [com]: ind ** 2 }), {});
             systems
-                .filter(system => system.components.every(_component => entity.components.includes(_component)))
+                .map(system => ({
+                    system,
+                    // Assign system by component points order
+                    points: system.components.reduce((points, component) => componentMapPoint[component] + points, 0)
+                }))
+                .filter(system => !isNaN(system.points))
+                .sort((systemA, systemB) =>
+                    systemB.points > systemA.points ? -1 : (systemB.points === systemA.points ? 0 : 1))
+                .map(({ system }) => system)
                 .forEach(system => {
                     systemEntitiesMap.set(system._id, [...systemEntitiesMap.get(system._id), entity.id]);
                     system.onAdd && system.onAdd(entity.id);
