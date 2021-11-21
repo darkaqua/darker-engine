@@ -194,13 +194,23 @@ export const game: GameFunction = () => {
     };
 
     const removeEntity = (...entityIdList: string[]) => {
-        entityIdList.forEach(entityId => {
+        const _entityList = entityIdList.map(entityId => entityList.find(entity => entity.id === entityId));
+        _entityList.forEach(entity => {
+            // Calculate points from component order.
+            const componentMapPoint = entity.components.reduce((obj, com, ind) => ({ ...obj, [com]: ind ** 2 }), {});
             systems
-                .filter(system => systemEntitiesMap.get(system._id).includes(entityId))
-                .reverse()
+                .map(system => ({
+                    system,
+                    // Assign system by component points order
+                    points: system.components.reduce((points, component) => componentMapPoint[component] + points, 0)
+                }))
+                .filter(system => !isNaN(system.points))
+                .sort((systemA, systemB) =>
+                    systemB.points > systemA.points ? 1 : (systemB.points === systemA.points ? 0 : -1))
+                .map(({ system }) => system)
                 .forEach(system => {
-                    system.onRemove && system.onRemove(entityId);
-                    systemEntitiesMap.set(system._id, systemEntitiesMap.get(system._id).filter(_id => _id !== entityId));
+                    system.onRemove && system.onRemove(entity.id);
+                    systemEntitiesMap.set(system._id, systemEntitiesMap.get(system._id).filter(_id => _id !== entity.id));
                 });
         });
         entityList = entityList.filter(entity => !entityIdList.includes(entity.id));
