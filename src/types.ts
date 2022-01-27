@@ -68,6 +68,9 @@ export interface EntityType {
     addRemoveComponentListener?: (callback: RemoveComponentFunctionType) => number;
     removeUpdateComponentListener?: (id: number) => any;
     removeRemoveComponentListener?: (id: number) => any;
+    // shortcuts
+    actions?: Record<string, <T>(data?: T) => any>;
+    shortcuts?: Record<string, <T>(entity: EntityType, data?: T) => any>;
 }
 
 export type UpdateComponentFunctionType = <ComponentType>(component: any, data: ComponentType) => any;

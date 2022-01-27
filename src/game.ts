@@ -164,6 +164,12 @@ export const game: GameFunction = () => {
             entity.removeRemoveComponentListener = (id: number) =>
                 entity._removeListenerList = entity._removeListenerList.filter((_, index) => id !== index);
 
+            //shortcuts
+            entity.shortcuts = entity.shortcuts || {};
+            entity.actions = {};
+            Object.keys(entity.shortcuts)
+                .forEach(key => entity.actions[key] = (data) => entity.shortcuts[key](entity, data))
+            
             entityDataMap.set(entity.id, entity.components.reduce((a, b) => ({
                 ...a,
                 [b as any]: a[b] || {}
