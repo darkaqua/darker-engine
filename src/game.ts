@@ -203,7 +203,8 @@ export const game: GameFunction = () => {
 
     const removeEntity = (...entityIdList: string[]) => {
         const _entityList = entityIdList.map(entityId => entityList[entityId]);
-        _entityList.forEach(entity => {
+        _entityList.map(entity => {
+            if(!entity) return;
             // Calculate points from component order.
             const componentMapPoint = entity.components.reduce((obj, com, ind) => ({ ...obj, [com]: ind ** 2 }), {});
             systems
