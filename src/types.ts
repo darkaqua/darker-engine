@@ -14,6 +14,9 @@ export interface GameType {
     
     load?: () => any;
     onLoad?: (callback: () => any) => any;
+
+    destroy?: () => any;
+    onDestroy?: (callback: () => any) => any;
 }
 
 export type GameFunction = () => GameType;

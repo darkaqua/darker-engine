@@ -10,6 +10,7 @@ export const game: GameFunction = () => {
     const systemEntitiesMap = new Map<string, string[]>();
     let isLoad: boolean = false;
     const loadListenerList = [];
+    const destroyListenerList = [];
 
     // Gets the entity list from current system
     const _system_getEntityList = (systemId: string) => [...systemEntitiesMap.get(systemId)];
@@ -239,6 +240,15 @@ export const game: GameFunction = () => {
         loadListenerList.push(callback);
         if(isLoad) callback();
     }
+
+    const destroy = () => {
+        destroyListenerList.forEach(callback => callback());
+        isLoad = false;
+        removeEntity(...Object.keys(entityList).reverse())
+    }
+    const onDestroy = (callback: () => any) => {
+        destroyListenerList.push(callback);
+    }
     
     return {
         setSystems,
@@ -248,6 +258,8 @@ export const game: GameFunction = () => {
         removeEntity,
         getSystem,
         load,
-        onLoad
+        onLoad,
+        destroy,
+        onDestroy
     }
 }
