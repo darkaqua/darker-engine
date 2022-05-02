@@ -12,7 +12,7 @@ export interface GameType {
 
     getSystem?: (name: string) => SystemType;
     
-    load?: () => any;
+    load?: (systems: SystemFunction[]) => any;
     onLoad?: (callback: () => any) => any;
 
     destroy?: () => any;

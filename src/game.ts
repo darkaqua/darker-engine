@@ -2,15 +2,16 @@ import {EntityType, GameFunction, SystemFunction, SystemType, UpdateComponentFun
 import {v4} from 'uuid';
 
 export const game: GameFunction = () => {
-    const systems: SystemType[] = [];
+    let systems: SystemType[] = [];
     let entityList: Record<string, EntityType> = {};
     // Contains which components/data has every entity
-    const entityDataMap = new Map<string, any>();
+    let entityDataMap = new Map<string, any>();
     // Contains which entities has every system
-    const systemEntitiesMap = new Map<string, string[]>();
+    let systemEntitiesMap = new Map<string, string[]>();
     let isLoad: boolean = false;
-    const loadListenerList = [];
-    const destroyListenerList = [];
+
+    let loadListenerList = [];
+    let destroyListenerList = [];
 
     // Gets the entity list from current system
     const _system_getEntityList = (systemId: string) => [...systemEntitiesMap.get(systemId)];
@@ -38,7 +39,8 @@ export const game: GameFunction = () => {
     // }
 
     const setSystems = (..._systems: SystemFunction[]) => {
-        const systemList = _systems.map(system => {
+        systemEntitiesMap = new Map<string, string[]>();
+        systems = _systems.map(system => {
             let systemId = `SYSTEM_${v4()}`
             const _system = system({
                 getEntityList: () => _system_getEntityList(systemId),
@@ -49,7 +51,7 @@ export const game: GameFunction = () => {
             if(_system._id)
                 systemId = _system._id;
             _system._id = systemId;
-            
+
             //data things
             // _system._data = {};
             // _system.getData = () => _system_getData(systemId);
@@ -58,12 +60,11 @@ export const game: GameFunction = () => {
             // _system._dataListenerList = [];
             // _system.addDataListener = (callback: any): number => _system_addDataListener(systemId, callback);
             // _system.removeDataListener = (index: number) => _system_removeDataListener(systemId, index);
-            
+
             systemEntitiesMap.set(systemId, []);
-            
+
             return _system;
         });
-        systems.push(...systemList);
     }
 
     const _entity_removeComponent = (entityId: string, component: any) => {
@@ -232,7 +233,10 @@ export const game: GameFunction = () => {
 
     const getSystem = (name: string) => systems.find(system => system._id === name);
 
-    const load = () => {
+    const load = (_systems: SystemFunction[]) => {
+        entityList = {};
+        entityDataMap = new Map<string, any>();
+
         loadListenerList.forEach(callback => callback());
         isLoad = true;
     }
@@ -242,7 +246,9 @@ export const game: GameFunction = () => {
     }
 
     const destroy = () => {
+        loadListenerList = [];
         destroyListenerList.forEach(callback => callback());
+        destroyListenerList = [];
         isLoad = false;
         removeEntity(...Object.keys(entityList).reverse())
     }
