@@ -233,7 +233,7 @@ export const game: GameFunction = () => {
 
     const getSystem = (name: string) => systems.find(system => system._id === name);
 
-    const load = (_systems: SystemFunction[]) => {
+    const load = () => {
         entityList = {};
         entityDataMap = new Map<string, any>();
 

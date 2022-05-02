@@ -1,7 +1,7 @@
 {
   "name": "darker-engine",
   "description": "ecs lightweight library",
-  "version": "2.14.1",
+  "version": "2.14.2",
   "author": "darkaqua",
   "license": "MIT",
   "main": "./build/index.js",
