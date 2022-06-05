@@ -233,10 +233,14 @@ export const game: GameFunction = () => {
 
     const getSystem = (name: string) => systems.find(system => system._id === name);
 
-    const load = () => {
+    const clear = () => {
+        loadListenerList = [];
+        destroyListenerList = [];
         entityList = {};
         entityDataMap = new Map<string, any>();
+    }
 
+    const load = () => {
         loadListenerList.forEach(callback => callback());
         isLoad = true;
     }
@@ -246,11 +250,10 @@ export const game: GameFunction = () => {
     }
 
     const destroy = () => {
-        loadListenerList = [];
         destroyListenerList.forEach(callback => callback());
-        destroyListenerList = [];
         isLoad = false;
-        removeEntity(...Object.keys(entityList).reverse())
+        removeEntity(...Object.keys(entityList).reverse());
+        clear();
     }
     const onDestroy = (callback: () => any) => {
         destroyListenerList.push(callback);
@@ -263,8 +266,12 @@ export const game: GameFunction = () => {
         addEntity,
         removeEntity,
         getSystem,
+
+        clear,
+
         load,
         onLoad,
+
         destroy,
         onDestroy
     }

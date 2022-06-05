@@ -12,6 +12,8 @@ export interface GameType {
 
     getSystem?: (name: string) => SystemType;
     
+    clear?: () => any;
+
     load?: () => any;
     onLoad?: (callback: () => any) => any;
 
