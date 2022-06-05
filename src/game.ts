@@ -133,7 +133,7 @@ export const game: GameFunction = () => {
         return entity;
     }
 
-    const _entity_getComponent = (entityId: string, component: any, deepClone: boolean = true) => {
+    const _entity_getComponent = (entityId: string, component: any, deepClone: boolean = false) => {
         const entityData = entityDataMap.get(entityId);
         return entityData && entityData[component]
             ? (
