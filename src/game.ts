@@ -133,10 +133,14 @@ export const game: GameFunction = () => {
         return entity;
     }
 
-    const _entity_getComponent = (entityId: string, component: any) => {
+    const _entity_getComponent = (entityId: string, component: any, deepClone: boolean = true) => {
         const entityData = entityDataMap.get(entityId);
         return entityData && entityData[component]
-            ? JSON.parse(JSON.stringify(entityData[component])) : {};
+            ? (
+                deepClone
+                    ? JSON.parse(JSON.stringify(entityData[component]))
+                    : {...entityData[component]}
+            ) : {};
     }
 
     const _entity_hasComponent = (entityId: string, component: any) =>
@@ -152,7 +156,7 @@ export const game: GameFunction = () => {
         const date = Date.now();
         entities.forEach(entity => {
             entity.getData = () => _entity_getData(entity.id);
-            entity.getComponent = (component) => _entity_getComponent(entity.id, component);
+            entity.getComponent = (component, deepClone) => _entity_getComponent(entity.id, component, deepClone);
             entity.hasComponent = (component) => _entity_hasComponent(entity.id, component);
             entity.removeComponent = (component) => _entity_removeComponent(entity.id, component);
             entity.updateComponent = ((component, data) => _entity_updateComponent(entity.id, component, data));

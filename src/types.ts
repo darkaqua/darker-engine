@@ -61,7 +61,7 @@ export interface EntityType {
     id: string;
     data: any;
     getData?: () => any;
-    getComponent?: <ComponentType>(component: any) => ComponentType;
+    getComponent?: <ComponentType>(component: any, deepClone?: boolean) => ComponentType;
     components: any[];
     hasComponent?: (component: any) => boolean;
     updateComponent?: UpdateComponentFunctionType;
