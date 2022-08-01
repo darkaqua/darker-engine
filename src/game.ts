@@ -163,8 +163,10 @@ export const game: GameFunction = () => {
     const _entity_getData = (entityId: string) =>
         JSON.parse(JSON.stringify(entityDataMap.get(entityId)));
 
-    const getEntityList = (...component: any[]): EntityType[] => {
-        return Object.values(entityList);
+    const getEntityList = (component?: any): EntityType[] => {
+        return component
+            ? componentEntityMap[component].map(entityId => entityList[entityId])
+            : Object.values(entityList);
     }
     const getEntity = (entityId: string) => entityList[entityId];
 

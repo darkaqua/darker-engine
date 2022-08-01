@@ -4,7 +4,7 @@
  */
 export interface GameType {
     setSystems?: (...systems: SystemFunction[]) => any;
-    getEntityList?: () => EntityType[],
+    getEntityList?: (component?: any) => EntityType[],
 
     getEntity?: (id: string) => EntityType,
     addEntity?: (...entities: EntityType[]) => EntityType[],
@@ -45,7 +45,7 @@ export interface SystemType {
 }
 
 export type SystemFunctionProps = {
-    getEntityList?: (component?: any) => string[];
+    getEntityList?: () => string[];
     
     // getData?: <DataType>() => DataType;
     // updateData?: <DataType>(data: DataType) => void;
