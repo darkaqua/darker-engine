@@ -81,7 +81,7 @@ export const game: GameFunction = () => {
 
         systems
             .filter(system => systemEntitiesMap.get(system._id).includes(entityId))
-            .filter(system => !system.components.every(_component => componentEntityMap[component]?.includes(entityId)))
+            .filter(system => !system.components.every(_component => componentEntityMap[_component]?.includes(entityId)))
             .reverse()
             .forEach(system => {
                 systemEntitiesMap.set(system._id, systemEntitiesMap.get(system._id).filter(_id => _id !== entityId));
@@ -132,7 +132,7 @@ export const game: GameFunction = () => {
             // Cuando los sistemas no contengan la entidad actual
             .filter(system => !systemEntitiesMap.get(system._id).includes(entityId))
             // Cuando la entidad tenga los componentes correspondientes a ese sistema
-            .filter(system => system.components.every(_component => componentEntityMap[component]?.includes(entityId)))
+            .filter(system => system.components.every(_component => componentEntityMap[_component]?.includes(entityId)))
             .forEach(system => {
                 systemEntitiesMap.set(system._id, [...systemEntitiesMap.get(system._id), entityId]);
                 system?.onAdd && system.onAdd(entityId);
