@@ -38,6 +38,12 @@ export const game: GameFunction = () => {
     //     const system = systems.find(_system => _system._id === systemId);
     //     return system._dataListenerList[index] = null;
     // }
+    
+    const _addEntityIdToComponentEntityMap = (component: string, entityId: string) => {
+        if(!componentEntityMap[component])
+            componentEntityMap[component] = [];
+        componentEntityMap[component].push(entityId);
+    }
 
     const setSystems = (..._systems: SystemFunction[]) => {
         systemEntitiesMap = new Map<string, string[]>();
@@ -75,7 +81,7 @@ export const game: GameFunction = () => {
 
         systems
             .filter(system => systemEntitiesMap.get(system._id).includes(entityId))
-            .filter(system => !system.components.every(_component => componentEntityMap[component].includes(entityId)))
+            .filter(system => !system.components.every(_component => componentEntityMap[component]?.includes(entityId)))
             .reverse()
             .forEach(system => {
                 systemEntitiesMap.set(system._id, systemEntitiesMap.get(system._id).filter(_id => _id !== entityId));
@@ -91,7 +97,7 @@ export const game: GameFunction = () => {
     const _entity_updateComponent = (entityId: string, component: any, data: any = {}) => {
 
         const entity = getEntity(entityId);
-        if(!componentEntityMap[component].includes(entityId))
+        if(!componentEntityMap[component]?.includes(entityId))
             return _entity_addComponent(entityId, component, data);
 
         const currentData = entityDataMap.get(entity._id);
@@ -115,7 +121,7 @@ export const game: GameFunction = () => {
     const _entity_addComponent = (entityId: string, component: any, data: any = {}) => {
         const entity = getEntity(entityId);
     
-        componentEntityMap[component].push(entityId)
+        _addEntityIdToComponentEntityMap(component, entityId);
         entityDataMap.set(entity._id, {
             ...entityDataMap.get(entity._id),
             [component as any]: data
@@ -126,7 +132,7 @@ export const game: GameFunction = () => {
             // Cuando los sistemas no contengan la entidad actual
             .filter(system => !systemEntitiesMap.get(system._id).includes(entityId))
             // Cuando la entidad tenga los componentes correspondientes a ese sistema
-            .filter(system => system.components.every(_component => componentEntityMap[component].includes(entityId)))
+            .filter(system => system.components.every(_component => componentEntityMap[component]?.includes(entityId)))
             .forEach(system => {
                 systemEntitiesMap.set(system._id, [...systemEntitiesMap.get(system._id), entityId]);
                 system?.onAdd && system.onAdd(entityId);
@@ -136,7 +142,7 @@ export const game: GameFunction = () => {
     
     const _entity_getComponents = (entityId: string) =>
         Object.keys(componentEntityMap).reduce((componentList, component) => {
-            if(componentEntityMap[component].includes(entityId))
+            if(componentEntityMap[component]?.includes(entityId))
                 componentList.push(component)
             return componentList;
         }, []);
@@ -152,7 +158,7 @@ export const game: GameFunction = () => {
     }
 
     const _entity_hasComponent = (entityId: string, component: any) =>
-        componentEntityMap[component].includes(entityId);
+        componentEntityMap[component]?.includes(entityId);
 
     const _entity_getData = (entityId: string) =>
         JSON.parse(JSON.stringify(entityDataMap.get(entityId)));
@@ -190,7 +196,7 @@ export const game: GameFunction = () => {
             Object.keys(entity._shortcuts)
                 .forEach(key => entity.actions[key] = (data) => entity._shortcuts[key](entity, data))
     
-            entity._components.forEach(component => componentEntityMap[component].push(entity._id))
+            entity._components.forEach(component => _addEntityIdToComponentEntityMap(component, entity._id))
             entityDataMap.set(entity._id, entity.getComponents().reduce((a, b) => ({
                 ...a,
                 [b as any]: a[b] || {}
