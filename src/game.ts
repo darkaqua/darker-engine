@@ -4,6 +4,7 @@ import {v4} from 'uuid';
 export const game: GameFunction = () => {
     let systems: SystemType[] = [];
     let entityList: Record<string, EntityType> = {};
+    let componentEntityMap: Record<string, string[]> = {};
     // Contains which components/data has every entity
     let entityDataMap = new Map<string, any>();
     // Contains which entities has every system
@@ -70,11 +71,11 @@ export const game: GameFunction = () => {
     const _entity_removeComponent = (entityId: string, component: any) => {
 
         const entity = getEntity(entityId);
-        entity.components = entity.components.filter(_component => component !== _component);
+        componentEntityMap[component] = componentEntityMap[component].filter(_entityId => entityId !== _entityId);
 
         systems
             .filter(system => systemEntitiesMap.get(system._id).includes(entityId))
-            .filter(system => !system.components.every(_component => entity.components.includes(_component)))
+            .filter(system => !system.components.every(_component => componentEntityMap[component].includes(entityId)))
             .reverse()
             .forEach(system => {
                 systemEntitiesMap.set(system._id, systemEntitiesMap.get(system._id).filter(_id => _id !== entityId));
@@ -90,11 +91,11 @@ export const game: GameFunction = () => {
     const _entity_updateComponent = (entityId: string, component: any, data: any = {}) => {
 
         const entity = getEntity(entityId);
-        if(!entity.components.includes(component))
+        if(!componentEntityMap[component].includes(entityId))
             return _entity_addComponent(entityId, component, data);
 
-        const currentData = entityDataMap.get(entity.id);
-        entityDataMap.set(entity.id, {
+        const currentData = entityDataMap.get(entity._id);
+        entityDataMap.set(entity._id, {
             ...currentData,
             [component as any]: {...(currentData[component] || {}), ...data}
         });
@@ -113,10 +114,10 @@ export const game: GameFunction = () => {
 
     const _entity_addComponent = (entityId: string, component: any, data: any = {}) => {
         const entity = getEntity(entityId);
-
-        entity.components.push(component);
-        entityDataMap.set(entity.id, {
-            ...entityDataMap.get(entity.id),
+    
+        componentEntityMap[component].push(entityId)
+        entityDataMap.set(entity._id, {
+            ...entityDataMap.get(entity._id),
             [component as any]: data
         });
 
@@ -125,13 +126,20 @@ export const game: GameFunction = () => {
             // Cuando los sistemas no contengan la entidad actual
             .filter(system => !systemEntitiesMap.get(system._id).includes(entityId))
             // Cuando la entidad tenga los componentes correspondientes a ese sistema
-            .filter(system => system.components.every(_component => entity.components.includes(_component)))
+            .filter(system => system.components.every(_component => componentEntityMap[component].includes(entityId)))
             .forEach(system => {
                 systemEntitiesMap.set(system._id, [...systemEntitiesMap.get(system._id), entityId]);
                 system?.onAdd && system.onAdd(entityId);
             });
         return entity;
     }
+    
+    const _entity_getComponents = (entityId: string) =>
+        Object.keys(componentEntityMap).reduce((componentList, component) => {
+            if(componentEntityMap[component].includes(entityId))
+                componentList.push(component)
+            return componentList;
+        }, []);
 
     const _entity_getComponent = (entityId: string, component: any, deepClone: boolean = false) => {
         const entityData = entityDataMap.get(entityId);
@@ -144,22 +152,25 @@ export const game: GameFunction = () => {
     }
 
     const _entity_hasComponent = (entityId: string, component: any) =>
-        getEntity(entityId).components.includes(component);
+        componentEntityMap[component].includes(entityId);
 
     const _entity_getData = (entityId: string) =>
         JSON.parse(JSON.stringify(entityDataMap.get(entityId)));
 
-    const getEntityList = (): EntityType[] => Object.values(entityList);
+    const getEntityList = (...component: any[]): EntityType[] => {
+        return Object.values(entityList);
+    }
     const getEntity = (entityId: string) => entityList[entityId];
 
     const addEntity = (...entities: EntityType[]): EntityType[] => {
         const date = Date.now();
         entities.forEach(entity => {
-            entity.getData = () => _entity_getData(entity.id);
-            entity.getComponent = (component, deepClone) => _entity_getComponent(entity.id, component, deepClone);
-            entity.hasComponent = (component) => _entity_hasComponent(entity.id, component);
-            entity.removeComponent = (component) => _entity_removeComponent(entity.id, component);
-            entity.updateComponent = ((component, data) => _entity_updateComponent(entity.id, component, data));
+            entity.getData = () => _entity_getData(entity._id);
+            entity.getComponent = (component, deepClone) => _entity_getComponent(entity._id, component, deepClone);
+            entity.getComponents = () => _entity_getComponents(entity._id);
+            entity.hasComponent = (component) => _entity_hasComponent(entity._id, component);
+            entity.removeComponent = (component) => _entity_removeComponent(entity._id, component);
+            entity.updateComponent = ((component, data) => _entity_updateComponent(entity._id, component, data));
 
             // listeners
             entity._updateListenerList = [];
@@ -174,22 +185,23 @@ export const game: GameFunction = () => {
                 entity._removeListenerList = entity._removeListenerList.filter((_, index) => id !== index);
 
             //shortcuts
-            entity.shortcuts = entity.shortcuts || {};
+            entity._shortcuts = entity._shortcuts || {};
             entity.actions = {};
-            Object.keys(entity.shortcuts)
-                .forEach(key => entity.actions[key] = (data) => entity.shortcuts[key](entity, data))
-            
-            entityDataMap.set(entity.id, entity.components.reduce((a, b) => ({
+            Object.keys(entity._shortcuts)
+                .forEach(key => entity.actions[key] = (data) => entity._shortcuts[key](entity, data))
+    
+            entity._components.forEach(component => componentEntityMap[component].push(entity._id))
+            entityDataMap.set(entity._id, entity.getComponents().reduce((a, b) => ({
                 ...a,
                 [b as any]: a[b] || {}
-            }), entity.data));
+            }), entity._data));
 
-            entityList[entity.id] = entity;
+            entityList[entity._id] = entity;
         })
         entities.forEach(entity => {
 
             // Calculate points from component order.
-            const componentMapPoint = entity.components.reduce((obj, com, ind) => ({ ...obj, [com]: ind ** 2 }), {});
+            const componentMapPoint = entity._components.reduce((obj, com, ind) => ({ ...obj, [com]: ind ** 2 }), {});
             systems
                 .map(system => ({
                     system,
@@ -201,8 +213,8 @@ export const game: GameFunction = () => {
                     systemB.points > systemA.points ? -1 : (systemB.points === systemA.points ? 0 : 1))
                 .map(({ system }) => system)
                 .forEach(system => {
-                    systemEntitiesMap.set(system._id, [...systemEntitiesMap.get(system._id), entity.id]);
-                    system.onAdd && system.onAdd(entity.id);
+                    systemEntitiesMap.set(system._id, [...systemEntitiesMap.get(system._id), entity._id]);
+                    system.onAdd && system.onAdd(entity._id);
                 });
         });
         const ms = Date.now() - date;
@@ -216,7 +228,7 @@ export const game: GameFunction = () => {
         _entityList.map(entity => {
             if(!entity) return;
             // Calculate points from component order.
-            const componentMapPoint = entity.components.reduce((obj, com, ind) => ({ ...obj, [com]: ind ** 2 }), {});
+            const componentMapPoint = entity.getComponents().reduce((obj, com, ind) => ({ ...obj, [com]: ind ** 2 }), {});
             systems
                 .map(system => ({
                     system,
@@ -228,10 +240,10 @@ export const game: GameFunction = () => {
                     systemB.points > systemA.points ? 1 : (systemB.points === systemA.points ? 0 : -1))
                 .map(({ system }) => system)
                 .forEach(system => {
-                    system.onRemove && system.onRemove(entity.id);
-                    systemEntitiesMap.set(system._id, systemEntitiesMap.get(system._id).filter(_id => _id !== entity.id));
+                    system.onRemove && system.onRemove(entity._id);
+                    systemEntitiesMap.set(system._id, systemEntitiesMap.get(system._id).filter(_id => _id !== entity._id));
                 });
-            delete entityList[entity.id];
+            delete entityList[entity._id];
         });
     };
 

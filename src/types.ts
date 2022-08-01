@@ -45,7 +45,7 @@ export interface SystemType {
 }
 
 export type SystemFunctionProps = {
-    getEntityList?: () => string[];
+    getEntityList?: (component?: any) => string[];
     
     // getData?: <DataType>() => DataType;
     // updateData?: <DataType>(data: DataType) => void;
@@ -58,11 +58,11 @@ export type SystemFunction =
  * Entity
  */
 export interface EntityType {
-    id: string;
-    data: any;
+    _id: string;
+    _data: any;
     getData?: () => any;
     getComponent?: <ComponentType>(component: any, deepClone?: boolean) => ComponentType;
-    components: any[];
+    getComponents?: () => any[];
     hasComponent?: (component: any) => boolean;
     updateComponent?: UpdateComponentFunctionType;
     removeComponent?: RemoveComponentFunctionType;
@@ -73,9 +73,11 @@ export interface EntityType {
     addRemoveComponentListener?: (callback: RemoveComponentFunctionType) => number;
     removeUpdateComponentListener?: (id: number) => any;
     removeRemoveComponentListener?: (id: number) => any;
+    //Only initial declaration
+    _components?: any[];
     // shortcuts
     actions?: Record<string, <T>(data?: T) => any>;
-    shortcuts?: Record<string, <T>(entity: EntityType, data?: T) => any>;
+    _shortcuts?: Record<string, <T>(entity: EntityType, data?: T) => any>;
 }
 
 export type UpdateComponentFunctionType = <ComponentType>(component: any, data: ComponentType) => any;
