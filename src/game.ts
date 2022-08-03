@@ -235,8 +235,9 @@ export const game: GameFunction = () => {
         const _entityList = entityIdList.map(entityId => entityList[entityId]);
         _entityList.map(entity => {
             if(!entity) return;
+            const componentEntityList = entity.getComponents();
             // Calculate points from component order.
-            const componentMapPoint = entity.getComponents().reduce((obj, com, ind) => ({ ...obj, [com]: ind ** 2 }), {});
+            const componentMapPoint = componentEntityList.reduce((obj, com, ind) => ({ ...obj, [com]: ind ** 2 }), {});
             systems
                 .map(system => ({
                     system,
@@ -252,6 +253,10 @@ export const game: GameFunction = () => {
                     systemEntitiesMap.set(system._id, systemEntitiesMap.get(system._id).filter(_id => _id !== entity._id));
                 });
             delete entityList[entity._id];
+    
+            componentEntityList.forEach((component) =>
+                componentEntityMap[component] = componentEntityMap[component].filter(_entityId => entity._id !== _entityId)
+            );
         });
     };
 
@@ -262,6 +267,7 @@ export const game: GameFunction = () => {
         destroyListenerList = [];
         entityList = {};
         entityDataMap = new Map<string, any>();
+        systemEntitiesMap = new Map<string, string[]>();
     }
 
     const load = () => {
