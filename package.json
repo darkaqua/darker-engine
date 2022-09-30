@@ -1,7 +1,7 @@
 {
   "name": "darker-engine",
   "description": "ecs lightweight library",
-  "version": "3.0.6-cjs",
+  "version": "3.1.1-cjs",
   "author": "darkaqua",
   "license": "MIT",
   "main": "./build/index.js",
@@ -38,8 +38,5 @@
     "nodemon": "2.0.7",
     "ts-node": "9.1.1",
     "typescript": "4.2.3"
-  },
-  "dependencies": {
-    "uuid": "9.0.0"
   }
 }

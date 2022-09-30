@@ -6,9 +6,9 @@ export interface GameType {
     setSystems?: (...systems: SystemFunction[]) => any;
     getEntityList?: (component?: any) => EntityType[],
 
-    getEntity?: (id: string) => EntityType,
+    getEntity?: (id: number) => EntityType,
     addEntity?: (...entities: EntityType[]) => EntityType[],
-    removeEntity?: (...idList: string[]) => any
+    removeEntity?: (...idList: number[]) => any
 
     getSystem?: (name: string) => SystemType;
     
@@ -19,6 +19,8 @@ export interface GameType {
 
     destroy?: () => any;
     onDestroy?: (callback: () => any) => any;
+    
+    getUID: () => number;
 }
 
 export type GameFunction = () => GameType;
@@ -29,9 +31,9 @@ export type GameFunction = () => GameType;
 export interface SystemType {
     _id?: string;
     components: any[];
-    onAdd?: (id: string) => any;
-    onUpdate?: (id: string, component?: any) => any;
-    onRemove?: (id: string) => any;
+    onAdd?: (id: number) => any;
+    onUpdate?: (id: number, component?: any) => any;
+    onRemove?: (id: number) => any;
     // onDataUpdate?: (data: any) => any;
     
     // _data?: any;
@@ -45,7 +47,7 @@ export interface SystemType {
 }
 
 export type SystemFunctionProps = {
-    getEntityList?: () => string[];
+    getEntityList?: () => number[];
     
     // getData?: <DataType>() => DataType;
     // updateData?: <DataType>(data: DataType) => void;
@@ -58,7 +60,7 @@ export type SystemFunction =
  * Entity
  */
 export interface EntityType {
-    _id: string;
+    _id: number;
     _data: any;
     getData?: () => any;
     getComponent?: <ComponentType>(component: any, deepClone?: boolean) => ComponentType;

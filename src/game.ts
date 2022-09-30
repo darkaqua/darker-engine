@@ -1,18 +1,20 @@
 import {EntityType, GameFunction, SystemFunction, SystemType, UpdateComponentFunctionType} from "./types";
-import {v4} from 'uuid';
+import {uid} from "./uid";
 
 export const game: GameFunction = () => {
     let systems: SystemType[] = [];
-    let entityList: Record<string, EntityType> = {};
-    let componentEntityMap: Record<string, string[]> = {};
+    let entityList: Record<number, EntityType> = {};
+    let componentEntityMap: Record<number, number[]> = {};
     // Contains which components/data has every entity
-    let entityDataMap = new Map<string, any>();
+    let entityDataMap = new Map<number, any>();
     // Contains which entities has every system
-    let systemEntitiesMap = new Map<string, string[]>();
+    let systemEntitiesMap = new Map<string, number[]>();
     let isLoad: boolean = false;
 
     let loadListenerList = [];
     let destroyListenerList = [];
+    
+    const { getUID } = uid()
 
     // Gets the entity list from current system
     const _system_getEntityList = (systemId: string) => [...systemEntitiesMap.get(systemId)];
@@ -39,16 +41,16 @@ export const game: GameFunction = () => {
     //     return system._dataListenerList[index] = null;
     // }
     
-    const _addEntityIdToComponentEntityMap = (component: string, entityId: string) => {
+    const _addEntityIdToComponentEntityMap = (component: string, entityId: number) => {
         if(!componentEntityMap[component])
             componentEntityMap[component] = [];
         componentEntityMap[component].push(entityId);
     }
 
     const setSystems = (..._systems: SystemFunction[]) => {
-        systemEntitiesMap = new Map<string, string[]>();
+        systemEntitiesMap = new Map<string, number[]>();
         systems = _systems.map(system => {
-            let systemId = `SYSTEM_${v4()}`
+            let systemId = `SYSTEM_${getUID()}`
             const _system = system({
                 getEntityList: () => _system_getEntityList(systemId),
                 // getData: () => _system_getData(systemId),
@@ -74,7 +76,7 @@ export const game: GameFunction = () => {
         });
     }
 
-    const _entity_removeComponent = (entityId: string, component: any) => {
+    const _entity_removeComponent = (entityId: number, component: any) => {
 
         const entity = getEntity(entityId);
         componentEntityMap[component] = componentEntityMap[component].filter(_entityId => entityId !== _entityId);
@@ -94,7 +96,7 @@ export const game: GameFunction = () => {
         return entity;
     }
 
-    const _entity_updateComponent = (entityId: string, component: any, data: any = {}) => {
+    const _entity_updateComponent = (entityId: number, component: any, data: any = {}) => {
 
         const entity = getEntity(entityId);
         if(!componentEntityMap[component]?.includes(entityId))
@@ -118,7 +120,7 @@ export const game: GameFunction = () => {
         return entity;
     }
 
-    const _entity_addComponent = (entityId: string, component: any, data: any = {}) => {
+    const _entity_addComponent = (entityId: number, component: any, data: any = {}) => {
         const entity = getEntity(entityId);
     
         _addEntityIdToComponentEntityMap(component, entityId);
@@ -140,14 +142,14 @@ export const game: GameFunction = () => {
         return entity;
     }
     
-    const _entity_getComponents = (entityId: string) =>
+    const _entity_getComponents = (entityId: number) =>
         Object.keys(componentEntityMap).reduce((componentList, component) => {
             if(componentEntityMap[component]?.includes(entityId))
                 componentList.push(component)
             return componentList;
         }, []);
 
-    const _entity_getComponent = (entityId: string, component: any, deepClone: boolean = false) => {
+    const _entity_getComponent = (entityId: number, component: any, deepClone: boolean = false) => {
         const entityData = entityDataMap.get(entityId);
         return entityData && entityData[component]
             ? (
@@ -157,10 +159,10 @@ export const game: GameFunction = () => {
             ) : {};
     }
 
-    const _entity_hasComponent = (entityId: string, component: any) =>
+    const _entity_hasComponent = (entityId: number, component: any) =>
         componentEntityMap[component]?.includes(entityId);
 
-    const _entity_getData = (entityId: string) =>
+    const _entity_getData = (entityId: number) =>
         JSON.parse(JSON.stringify(entityDataMap.get(entityId)));
 
     const getEntityList = (component?: any): EntityType[] => {
@@ -168,7 +170,7 @@ export const game: GameFunction = () => {
             ? (componentEntityMap[component]?.map(entityId => entityList[entityId]) || [])
             : Object.values(entityList);
     }
-    const getEntity = (entityId: string) => entityList[entityId];
+    const getEntity = (entityId: number) => entityList[entityId];
 
     const addEntity = (...entities: EntityType[]): EntityType[] => {
         const date = Date.now();
@@ -231,7 +233,7 @@ export const game: GameFunction = () => {
         return entities;
     };
 
-    const removeEntity = (...entityIdList: string[]) => {
+    const removeEntity = (...entityIdList: number[]) => {
         const _entityList = entityIdList.map(entityId => entityList[entityId]);
         _entityList.map(entity => {
             if(!entity) return;
@@ -266,8 +268,8 @@ export const game: GameFunction = () => {
         loadListenerList = [];
         destroyListenerList = [];
         entityList = {};
-        entityDataMap = new Map<string, any>();
-        systemEntitiesMap = new Map<string, string[]>();
+        entityDataMap = new Map<number, any>();
+        systemEntitiesMap = new Map<string, number[]>();
     }
 
     const load = () => {
@@ -282,7 +284,7 @@ export const game: GameFunction = () => {
     const destroy = () => {
         destroyListenerList.forEach(callback => callback());
         isLoad = false;
-        removeEntity(...Object.keys(entityList).reverse());
+        removeEntity(...Object.values(entityList).map(entity => entity._id).reverse());
         clear();
     }
     const onDestroy = (callback: () => any) => {
@@ -303,6 +305,8 @@ export const game: GameFunction = () => {
         onLoad,
 
         destroy,
-        onDestroy
+        onDestroy,
+    
+        getUID
     }
 }
