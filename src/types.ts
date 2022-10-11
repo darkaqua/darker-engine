@@ -4,6 +4,7 @@
  */
 export interface GameType {
     setSystems?: (...systems: SystemFunction[]) => any;
+    
     getEntityList?: () => EntityType[],
     getEntityListByType?: (type: number) => EntityType[],
     getEntityListByComponents?: (...componentList: string[]) => EntityType[],
@@ -66,7 +67,7 @@ export interface EntityType {
     readonly id: number;
     readonly type: number;
     readonly data: Record<string, Object>;
-    readonly components?: string[];
+    readonly components: string[];
     readonly shortcuts?: Record<string, <T>(entity: EntityType, data?: T) => any>;
 
     getData?: () => Record<string, Object>;
@@ -88,5 +89,3 @@ export interface EntityType {
 
 export type UpdateComponentFunctionType = <ComponentType>(component: any, data: ComponentType) => any;
 export type RemoveComponentFunctionType = (component: any) => any;
-
-export type EntityFunction = (...props: any) => EntityType;

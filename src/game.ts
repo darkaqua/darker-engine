@@ -19,16 +19,6 @@ export const game: GameFunction = () => {
 
     // Gets the entity list from current system
     const _system_getEntityList = (systemId: string) => [...systemEntitiesMap.get(systemId)];
-    
-    const _addEntityToMaps = (component: string, entity: EntityType) => {
-        if(!entityComponentMap[entity.id])
-            entityComponentMap[entity.id] = [];
-        entityComponentMap[entity.id].push(component);
-
-        if(!typeEntityMap[entity.type])
-            typeEntityMap[entity.type] = [];
-        typeEntityMap[entity.type].push(entity.id);
-    }
 
     const setSystems = (..._systems: SystemFunction[]) => {
         systemEntitiesMap = new Map<string, number[]>();
@@ -106,8 +96,8 @@ export const game: GameFunction = () => {
 
     const _entity_addComponent = (entityId: number, component: string, data: any = {}) => {
         const entity = getEntity(entityId);
-    
-        _addEntityToMaps(component, entity);
+        
+        entityComponentMap[entity.id].push(component);
         entityDataMap.set(entity.id, {
             ...entityDataMap.get(entity.id),
             [component as any]: data
@@ -150,15 +140,16 @@ export const game: GameFunction = () => {
     const _entity_getData = (entityId: number) =>
         JSON.parse(JSON.stringify(entityDataMap.get(entityId)));
 
-    const getEntityList = (): EntityType[] => Object.values(entityList);
+    const getEntityList = (): EntityType[] => Object.values(entityList) || [];
 
     const getEntityListByType = (type: number): EntityType[] => typeEntityMap[type]?.map(entityId => entityList[entityId]) || []
 
     const getEntityListByComponents = (...componentList: string[]): EntityType[] => {
         const entityIdList = Object.keys(entityComponentMap);
-        return Object.values(entityComponentMap).reduce((entityList, entityComponents, index) => [
-            ...entityList,
-            componentList.every((component) => entityComponents.includes(component)) ? entityList[entityIdList[index]] : undefined
+        return Object.values(entityComponentMap).reduce((currentEntityList, entityComponents, index) => [
+            ...currentEntityList,
+            componentList.length === 0 || componentList.every((component) => entityComponents.includes(component))
+                ? entityList[entityIdList[index]] : undefined
         ], []).filter(e => e !== undefined);
     }
 
@@ -190,8 +181,13 @@ export const game: GameFunction = () => {
             entity.actions = {};
             Object.keys(entity.shortcuts || {})
                 .forEach(key => entity.actions[key] = (data) => entity.shortcuts[key](entity, data))
+            
+            if(!typeEntityMap[entity.type])
+                typeEntityMap[entity.type] = [];
+            typeEntityMap[entity.type].push(entity.id);
     
-            entity.components.forEach(component => _addEntityToMaps(component, entity))
+            entityComponentMap[entity.id] = entity.components;
+            
             entityDataMap.set(entity.id, entity.getComponents().reduce((a, b) => ({
                 ...a,
                 [b as any]: a[b] || {}
