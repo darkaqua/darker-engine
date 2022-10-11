@@ -93,7 +93,12 @@ export const game: GameFunction = () => {
             .reverse()
             .forEach(system => {
                 systemEntitiesMap.set(system._id, systemEntitiesMap.get(system._id).filter(_id => _id !== entityId));
-                system.onRemove && system.onRemove(entityId);
+                try {
+                    system.onRemove && system.onRemove(entityId);
+                } catch (e) {
+                    console.warn(`Error catch system::${system._id} "onRemove(${entityId})"`);
+                    console.error(e);
+                }
             });
     
         // call the listeners
@@ -118,7 +123,14 @@ export const game: GameFunction = () => {
             //Only filters the current updated component
             .filter(system => system.components.includes(component))
             .filter(system => systemEntitiesMap.get(system._id).includes(entityId))
-            .forEach(system => system.onUpdate && system.onUpdate(entityId, component));
+            .forEach(system => {
+                try {
+                    system.onUpdate && system.onUpdate(entityId, component)
+                } catch (e) {
+                    console.warn(`Error catch system::${system._id} "onUpdate(${entityId}, ${component})"`);
+                    console.error(e);
+                }
+            });
         
         // call the listeners
         entity._updateListenerList.filter(c => c).forEach(callback => callback(component, data));
@@ -143,7 +155,12 @@ export const game: GameFunction = () => {
             .filter(system => system.components.every(_component => entityComponentMap[entityId]?.includes(_component)))
             .forEach(system => {
                 systemEntitiesMap.set(system._id, [...systemEntitiesMap.get(system._id), entityId]);
-                system?.onAdd && system.onAdd(entityId);
+                try {
+                    system?.onAdd && system.onAdd(entityId);
+                } catch (e) {
+                    console.warn(`Error catch system::${system._id} "onAdd(${entityId})"`);
+                    console.error(e);
+                }
             });
         return entity;
     }
@@ -226,7 +243,12 @@ export const game: GameFunction = () => {
                 .map(({ system }) => system)
                 .forEach(system => {
                     systemEntitiesMap.set(system._id, [...systemEntitiesMap.get(system._id), entity._id]);
-                    system.onAdd && system.onAdd(entity._id);
+                    try {
+                        system?.onAdd && system.onAdd(entity._id);
+                    } catch (e) {
+                        console.warn(`Error catch system::${system._id} "onUpdate(${entity._id})"`);
+                        console.error(e);
+                    }
                 });
         });
         const ms = Date.now() - date;
@@ -253,7 +275,12 @@ export const game: GameFunction = () => {
                     systemB.points > systemA.points ? 1 : (systemB.points === systemA.points ? 0 : -1))
                 .map(({ system }) => system)
                 .forEach(system => {
-                    system.onRemove && system.onRemove(entity._id);
+                    try {
+                        system.onRemove && system.onRemove(entity._id);
+                    } catch (e) {
+                        console.warn(`Error catch system::${system._id} "onRemove(${entity._id})"`);
+                        console.error(e);
+                    }
                     systemEntitiesMap.set(system._id, systemEntitiesMap.get(system._id).filter(_id => _id !== entity._id));
                 });
             delete entityList[entity._id];
