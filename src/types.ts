@@ -4,7 +4,9 @@
  */
 export interface GameType {
     setSystems?: (...systems: SystemFunction[]) => any;
-    getEntityList?: (component?: any) => EntityType[],
+    getEntityList?: () => EntityType[],
+    getEntityListByType?: (type: number) => EntityType[],
+    getEntityListByComponents?: (...componentList: string[]) => EntityType[],
 
     getEntity?: (id: number) => EntityType,
     addEntity?: (...entities: EntityType[]) => EntityType[],
@@ -29,10 +31,10 @@ export type GameFunction = () => GameType;
  * System
  */
 export interface SystemType {
-    _id?: string;
-    components: any[];
+    id?: string;
+    components: string[];
     onAdd?: (id: number) => any;
-    onUpdate?: (id: number, component?: any) => any;
+    onUpdate?: (id: number, component?: string) => any;
     onRemove?: (id: number) => any;
     // onDataUpdate?: (data: any) => any;
     
@@ -60,12 +62,17 @@ export type SystemFunction =
  * Entity
  */
 export interface EntityType {
-    _id: number;
-    _data: any;
-    getData?: () => any;
-    getComponent?: <ComponentType>(component: any, deepClone?: boolean) => ComponentType;
+    //Only initial declaration
+    readonly id: number;
+    readonly type: number;
+    readonly data: Record<string, Object>;
+    readonly components?: string[];
+    readonly shortcuts?: Record<string, <T>(entity: EntityType, data?: T) => any>;
+
+    getData?: () => Record<string, Object>;
+    getComponent?: <ComponentType>(component: string, deepClone?: boolean) => ComponentType;
     getComponents?: () => any[];
-    hasComponent?: (component: any) => boolean;
+    hasComponent?: (component: string) => boolean;
     updateComponent?: UpdateComponentFunctionType;
     removeComponent?: RemoveComponentFunctionType;
     // listeners
@@ -75,11 +82,8 @@ export interface EntityType {
     addRemoveComponentListener?: (callback: RemoveComponentFunctionType) => number;
     removeUpdateComponentListener?: (id: number) => any;
     removeRemoveComponentListener?: (id: number) => any;
-    //Only initial declaration
-    _components?: any[];
     // shortcuts
     actions?: Record<string, <T>(data?: T) => any>;
-    _shortcuts?: Record<string, <T>(entity: EntityType, data?: T) => any>;
 }
 
 export type UpdateComponentFunctionType = <ComponentType>(component: any, data: ComponentType) => any;
