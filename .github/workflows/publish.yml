@@ -22,7 +22,7 @@ jobs:
       - name: Install modules
         run: yarn
       - name: Add version to package.json
-        uses: jaywcjlove/github-action-package
+        uses: jaywcjlove/github-action-package@main
         with:
           data: |
             {
@@ -48,7 +48,7 @@ jobs:
       - name: Install modules
         run: yarn
       - name: Add version to package.json
-        uses: jaywcjlove/github-action-package
+        uses: jaywcjlove/github-action-package@main
         with:
           data: |
             {
