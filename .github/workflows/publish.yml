@@ -5,6 +5,7 @@ on:
       - '*'
 jobs:
   tests:
+    name: 'Tests'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -12,31 +13,9 @@ jobs:
         run: yarn
       - name: Run tests
         run: yarn run test
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Install modules
-        run: yarn
-      - name: Add version to package.json
-        uses: jaywcjlove/github-action-package@v1.0.0
-        with:
-          data: |
-            {
-              "version": "${{ github.ref_name }}"
-            }
-      - name: Build
-        run: yarn run build
-      # Setup .npmrc file to publish to npm
-      - uses: actions/setup-node@v3
-        with:
-          node-version: '16.x'
-          registry-url: 'https://registry.npmjs.org'
-      - name: Publish
-        run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
   build-cjs:
+    name: 'Build CJS'
+    needs: tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -51,6 +30,32 @@ jobs:
             }
       - name: Build
         run: yarn run build:cjs
+      # Setup .npmrc file to publish to npm
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16.x'
+          registry-url: 'https://registry.npmjs.org'
+      - name: Publish
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+  build:
+    name: 'Build'
+    needs: [tests, build-cjs]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install modules
+        run: yarn
+      - name: Add version to package.json
+        uses: jaywcjlove/github-action-package@v1.0.0
+        with:
+          data: |
+            {
+              "version": "${{ github.ref_name }}"
+            }
+      - name: Build
+        run: yarn run build
       # Setup .npmrc file to publish to npm
       - uses: actions/setup-node@v3
         with:
