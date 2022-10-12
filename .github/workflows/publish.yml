@@ -4,7 +4,7 @@ on:
     tags:
       - '*'
 jobs:
-  build:
+  tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -12,7 +12,13 @@ jobs:
         run: yarn
       - name: Run tests
         run: yarn run test
-      - name: Read & Modify of package.json
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install modules
+        run: yarn
+      - name: Add version to package.json
         uses: jaywcjlove/github-action-package@v1.0.0
         with:
           data: |
@@ -21,6 +27,30 @@ jobs:
             }
       - name: Build
         run: yarn run build
+      # Setup .npmrc file to publish to npm
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16.x'
+          registry-url: 'https://registry.npmjs.org'
+      - name: Publish
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+  build-cjs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install modules
+        run: yarn
+      - name: Add version to package.json
+        uses: jaywcjlove/github-action-package@v1.0.0
+        with:
+          data: |
+            {
+              "version": "${{ github.ref_name }}-cjs"
+            }
+      - name: Build
+        run: yarn run build:cjs
       # Setup .npmrc file to publish to npm
       - uses: actions/setup-node@v3
         with:
