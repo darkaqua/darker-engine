@@ -1,7 +1,8 @@
-![](https://img.shields.io/github/workflow/status/darkaqua/darker-engine/Tests?label=Tests&style=for-the-badge)
-![](https://img.shields.io/github/workflow/status/darkaqua/darker-engine/Publish?label=Build&style=for-the-badge)
-![https://www.npmjs.com/package/darker-engine](https://img.shields.io/npm/v/darker-engine?style=for-the-badge)
-![](https://img.shields.io/bundlephobia/min/darker-engine?label=BUILD%20SIZE&style=for-the-badge)
+[![](https://img.shields.io/badge/dependencies-0-yellow?style=for-the-badge)](https://www.npmjs.com/package/darker-engine?activeTab=dependencies)
+[![](https://img.shields.io/github/workflow/status/darkaqua/darker-engine/Tests?label=Tests&style=for-the-badge)](https://github.com/darkaqua/darker-engine/actions/workflows/tests.yml)
+[![](https://img.shields.io/github/workflow/status/darkaqua/darker-engine/Publish?label=Build&style=for-the-badge)](https://github.com/darkaqua/darker-engine/actions/workflows/publish.yml)
+[![](https://img.shields.io/npm/v/darker-engine?style=for-the-badge)](https://www.npmjs.com/package/darker-engine)
+[![](https://img.shields.io/bundlephobia/min/darker-engine?label=BUILD%20SIZE&style=for-the-badge)](https://www.npmjs.com/package/darker-engine)
 
 # Darker-Engine
 
