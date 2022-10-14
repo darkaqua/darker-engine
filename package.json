@@ -16,7 +16,7 @@
     "build:js": "esbuild src/index.ts --bundle --format=esm --outfile=build/index.js",
     "build:dts": "tsc src/index.ts --declaration --emitDeclarationOnly --outDir build",
     "link": "yarn link",
-    "test": "jest",
+    "test": "jest --verbose",
     "test:watch": "jest --watch"
   },
   "files": [
