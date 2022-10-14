@@ -36,68 +36,22 @@ import {EntityType} from "darker-engine";
 const exampleEntity = (): EntityType => ({
     id: Game.getUID(),
     type: EntityType.EXAMPLE,
-    data: {
-        [Components.EXAMPLE_COMPONENT]: {
-            foo: 'faa'
-        }
-    },
-    components: [
-        Components.EXAMPLE_COMPONENT
-    ]
+    data: {},
+    components: []
 });
 ```
 #### Systems
 ```ts
 import {SystemFunction} from "darker-engine";
-
+ 
 const exampleSystem: SystemFunction = () => {
     
-    let interval;
-    
-    Game.onLoad(() => {
-        console.log('welcome!')
-        Game.addEntity(exampleEntity());
-        
-        interval = setInterval(() => {
-            const entityList = Game.getEntityList();
-            const entityListByType = Game.getEntityListByType(EntityType.EXAMPLE);
-            const entityListByComponents = Game.getEntityListByComponents(Components.EXAMPLE_COMPONENT);
-            
-            console.log(`Entities`);
-            console.log(` - total: ${entityList.length}`);
-            console.log(` - type: ${entityListByType.length}`);
-            console.log(` - component: ${entityListByComponents.length}`);
-        }, 5_000)
-    });
-    
-    Game.onDestroy(() => {
-        clearInterval(interval);
-        console.log('bye!')
-    });
-    
-    const onAdd = (entityId: number) => {
-        const entity = Game.getEntity(id);
-        entity.updateComponent(Components.EXAMPLE_COMPONENT, { foo: 'fii' });
-    }
-    
-    const onUpdate = (entityId: number, component: string) => {
-        const entity = Game.getEntity(id);
-        
-        if(component !== Components.EXAMPLE_COMPONENT) return;
-        
-        const { foo } = entity.getComponent(Components.EXAMPLE_COMPONENT);
-        if(foo === 'fii' && !entity.hasComponent('FAKE_COMPONENT'))
-            entity.removeComponent(Components.EXAMPLE_COMPONENT);
-    }
-    
-    const onRemove = (entityId: number) => {
-        Game.removeEntity(entityId);
-    }
+    const onAdd = (entityId: number) => {}
+    const onUpdate = (entityId: number, component: string) => {}
+    const onRemove = (entityId: number) => {}
     
     return {
-        components: [
-            Components.EXAMPLE_COMPONENT
-        ],
+        components: [],
         onAdd,
         onUpdate,
         onRemove
