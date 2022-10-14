@@ -11,17 +11,17 @@ export interface GameType {
 
     getEntity?: (id: number) => EntityType,
     addEntity?: (...entities: EntityType[]) => EntityType[],
-    removeEntity?: (...idList: number[]) => any
+    removeEntity?: (...idList: number[]) => void;
 
     getSystem?: (name: string) => SystemType;
     
-    clear?: () => any;
+    clear?: () => void;
 
-    load?: () => any;
-    onLoad?: (callback: () => any) => any;
+    load?: () => void;
+    onLoad?: (callback: () => void) => void;
 
-    destroy?: () => any;
-    onDestroy?: (callback: () => any) => any;
+    destroy?: () => void;
+    onDestroy?: (callback: () => void) => void;
     
     getUID: () => number;
 }
@@ -34,9 +34,9 @@ export type GameFunction = () => GameType;
 export interface SystemType {
     id?: string;
     components: string[];
-    onAdd?: (id: number) => any;
-    onUpdate?: (id: number, component?: string) => any;
-    onRemove?: (id: number) => any;
+    onAdd?: (id: number) => void;
+    onUpdate?: (id: number, component?: string) => void;
+    onRemove?: (id: number) => void;
 }
 
 export type SystemFunction = () => SystemType;
@@ -50,17 +50,17 @@ export interface EntityType {
     readonly type: number;
     readonly data: Record<string, Object>;
     readonly components: string[];
-    readonly shortcuts?: Record<string, <T>(entity: EntityType, data?: T) => any>;
+    readonly shortcuts?: Record<string, <T>(entity: EntityType, data?: T) => unknown>;
 
     getData?: () => Record<string, Object>;
     getComponent?: <ComponentType>(component: string, deepClone?: boolean) => ComponentType;
-    getComponents?: () => any[];
+    getComponents?: () => string[];
     hasComponent?: (component: string) => boolean;
     updateComponent?: UpdateComponentFunctionType;
     removeComponent?: RemoveComponentFunctionType;
     // shortcuts
-    actions?: Record<string, <T>(data?: T) => any>;
+    actions?: Record<string, <T>(data?: T) => unknown>;
 }
 
-export type UpdateComponentFunctionType = <ComponentType>(component: any, data: ComponentType) => any;
-export type RemoveComponentFunctionType = (component: any) => any;
+export type UpdateComponentFunctionType = <ComponentType>(component: string, data: ComponentType) => void;
+export type RemoveComponentFunctionType = (component: string) => void;
