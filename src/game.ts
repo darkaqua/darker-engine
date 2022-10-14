@@ -17,16 +17,11 @@ export const game: GameFunction = () => {
     
     const { getUID } = uid()
 
-    // Gets the entity list from current system
-    const _system_getEntityList = (systemId: string) => [...systemEntitiesMap.get(systemId)];
-
     const setSystems = (..._systems: SystemFunction[]) => {
         systemEntitiesMap = new Map<string, number[]>();
         systems = _systems.map(system => {
             let systemId = `SYSTEM_${getUID()}`
-            const _system = system({
-                getEntityList: () => _system_getEntityList(systemId),
-            });
+            const _system = system();
             // Sets id if declared
             if(_system.id)
                 systemId = _system.id;
@@ -56,9 +51,6 @@ export const game: GameFunction = () => {
                     console.error(e);
                 }
             });
-    
-        // call the listeners
-        entity._removeListenerList.filter(c => c).forEach(callback => callback(component));
         
         return entity;
     }
@@ -87,9 +79,6 @@ export const game: GameFunction = () => {
                     console.error(e);
                 }
             });
-        
-        // call the listeners
-        entity._updateListenerList.filter(c => c).forEach(callback => callback(component, data));
 
         return entity;
     }
@@ -164,19 +153,7 @@ export const game: GameFunction = () => {
             entity.hasComponent = (component) => _entity_hasComponent(entity.id, component);
             entity.removeComponent = (component) => _entity_removeComponent(entity.id, component);
             entity.updateComponent = ((component, data) => _entity_updateComponent(entity.id, component, data));
-
-            // listeners
-            entity._updateListenerList = [];
-            entity._removeListenerList = [];
-            entity.addUpdateComponentListener = (callback: UpdateComponentFunctionType) =>
-                entity._updateListenerList.push(callback);
-            entity.addRemoveComponentListener = (callback: UpdateComponentFunctionType) =>
-                entity._updateListenerList.push(callback);
-            entity.removeUpdateComponentListener = (id: number) =>
-                entity._updateListenerList = entity._updateListenerList.filter((_, index) => id !== index);
-            entity.removeRemoveComponentListener = (id: number) =>
-                entity._removeListenerList = entity._removeListenerList.filter((_, index) => id !== index);
-
+            
             //shortcuts
             entity.actions = {};
             Object.keys(entity.shortcuts || {})

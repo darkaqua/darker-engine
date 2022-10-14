@@ -37,27 +37,9 @@ export interface SystemType {
     onAdd?: (id: number) => any;
     onUpdate?: (id: number, component?: string) => any;
     onRemove?: (id: number) => any;
-    // onDataUpdate?: (data: any) => any;
-    
-    // _data?: any;
-    // _dataListenerList?: any[];
-    //
-    // getData?: <DataType>() => DataType;
-    // updateData?: <DataType>(data: DataType) => void;
-    //
-    // addDataListener?: (callback: (data: any) => any) => number;
-    // removeDataListener?: (id: number) => any;
 }
 
-export type SystemFunctionProps = {
-    getEntityList?: () => number[];
-    
-    // getData?: <DataType>() => DataType;
-    // updateData?: <DataType>(data: DataType) => void;
-}
-
-export type SystemFunction =
-    (props: SystemFunctionProps) => SystemType;
+export type SystemFunction = () => SystemType;
 
 /**
  * Entity
@@ -76,13 +58,6 @@ export interface EntityType {
     hasComponent?: (component: string) => boolean;
     updateComponent?: UpdateComponentFunctionType;
     removeComponent?: RemoveComponentFunctionType;
-    // listeners
-    _updateListenerList?: any[];
-    _removeListenerList?: any[];
-    addUpdateComponentListener?: (callback: UpdateComponentFunctionType) => number;
-    addRemoveComponentListener?: (callback: RemoveComponentFunctionType) => number;
-    removeUpdateComponentListener?: (id: number) => any;
-    removeRemoveComponentListener?: (id: number) => any;
     // shortcuts
     actions?: Record<string, <T>(data?: T) => any>;
 }
