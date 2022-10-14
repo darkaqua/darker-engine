@@ -11,21 +11,33 @@ describe('System', () => {
     const onUpdateSystemAMock = jest.fn();
     const onUpdateSystemBMock = jest.fn();
     
+    const onRemoveSystemAMock = jest.fn();
+    const onRemoveSystemBMock = jest.fn();
+    
     const systemA: SystemFunction = () => ({
         id: 'SYSTEM_A',
         components: ['COMPONENT_A'],
         onAdd: onAddSystemAMock,
         onUpdate: onUpdateSystemAMock,
+        onRemove: onRemoveSystemAMock
     });
     const systemB: SystemFunction = () => ({
         id: 'SYSTEM_B',
         components: ['COMPONENT_A', 'COMPONENT_B'],
         onAdd: onAddSystemBMock,
         onUpdate: onUpdateSystemBMock,
+        onRemove: onRemoveSystemBMock
     });
     Game.setSystems(systemA, systemB);
     
     const entityA = getEntity(Game.getUID(), 0, {}, ['COMPONENT_A']);
+    
+    describe('systems', () => {
+        it('expect systems to exist', function () {
+            expect(Game.getSystem('SYSTEM_A')).not.toBeUndefined();
+            expect(Game.getSystem('SYSTEM_B')).not.toBeUndefined();
+        });
+    });
     
     describe('onAdd', () => {
         
@@ -73,7 +85,18 @@ describe('System', () => {
     });
     
     describe('onRemove', () => {
+        test('expect remove entity component and be removed from system B', () => {
+            entityA.removeComponent('COMPONENT_B');
     
+            expect(onRemoveSystemAMock).not.toBeCalledWith(entityA.id);
+            expect(onRemoveSystemBMock).toBeCalledWith(entityA.id);
+        });
+    
+        test('expect remove entity component and be removed from system A', () => {
+            entityA.removeComponent('COMPONENT_A');
+        
+            expect(onRemoveSystemAMock).toBeCalledWith(entityA.id);
+        });
     });
     
 });

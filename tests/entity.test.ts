@@ -44,7 +44,7 @@ describe('Entity', () => {
         foo: 'faa'
     }
     
-    test('expect update component data and check that is valid', () => {
+    test('expect update component data', () => {
         Game.addEntity(entityA);
     
         entityA.updateComponent('COMPONENT_A', componentData);
@@ -52,7 +52,18 @@ describe('Entity', () => {
         expect(entityA.getComponent('COMPONENT_A')).toEqual(componentData)
     });
     
-    test('expect raw data to contain data', () => {
+    test('expect entity raw data to contain data', () => {
         expect(entityA.getData()).toEqual({ 'COMPONENT_A': componentData })
     });
+    
+    test('expect to add new component to an existing entity', () => {
+        expect(entityA.id).not.toBeUndefined();
+    
+        const componentData = { foo: 'faa', fii: 123 };
+        
+        entityA.updateComponent('NEW_COMPONENT', componentData);
+        
+        expect(entityA.hasComponent('NEW_COMPONENT')).toBeTruthy();
+        expect(entityA.getComponent('NEW_COMPONENT')).toEqual(componentData)
+    })
 });
