@@ -15,5 +15,3 @@ jobs:
         run: yarn run test
       - name: Build
         run: yarn run build
-      - name: Build CJS
-        run: yarn run build:cjs
