@@ -1,4 +1,4 @@
-import {EntityType, GameFunction, SystemFunction, SystemType, UpdateComponentFunctionType} from "./types";
+import {EntityType, GameFunction, SystemFunction, SystemType} from "./types";
 import {uid} from "./uid";
 
 export const game: GameFunction = () => {
@@ -10,7 +10,6 @@ export const game: GameFunction = () => {
     let entityDataMap = new Map<number, any>();
     // Contains which entities has every system
     let systemEntitiesMap = new Map<string, number[]>();
-    let isLoad: boolean = false;
     
     const { getUID } = uid()
 
@@ -243,12 +242,10 @@ export const game: GameFunction = () => {
 
     const load = () => {
         systems.forEach(system => system?.onLoad());
-        isLoad = true;
     }
 
     const destroy = () => {
         systems.forEach(system => system?.onDestroy());
-        isLoad = false;
         removeEntity(...Object.values(entityList).map(entity => entity.id).reverse());
         clear();
     }

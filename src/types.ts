@@ -18,10 +18,7 @@ export interface GameType {
     clear?: () => void;
 
     load?: () => void;
-    onLoad?: (callback: () => void) => void;
-
     destroy?: () => void;
-    onDestroy?: (callback: () => void) => void;
     
     getUID: () => number;
 }
