@@ -37,6 +37,9 @@ export interface SystemType {
     onAdd?: (id: number) => void;
     onUpdate?: (id: number, component?: string) => void;
     onRemove?: (id: number) => void;
+    
+    onLoad?: () => void;
+    onDestroy?: () => void;
 }
 
 export type SystemFunction = () => SystemType;

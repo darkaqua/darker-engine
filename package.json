@@ -12,6 +12,7 @@
     "start": "./node_modules/.bin/ts-node ./src/index.ts",
     "build": "yarn run build:js && yarn run build:dts",
     "build:js": "esbuild src/index.ts --bundle --format=cjs --outfile=build/index.js",
+    "build:ts": "esbuild src/index.ts --bundle --format=ts --outfile=build/index.ts",
     "build:dts": "tsc src/index.ts --declaration --emitDeclarationOnly --outDir build",
     "link": "yarn link",
     "test": "jest --verbose",

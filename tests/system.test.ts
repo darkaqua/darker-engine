@@ -14,19 +14,29 @@ describe('System', () => {
     const onRemoveSystemAMock = jest.fn();
     const onRemoveSystemBMock = jest.fn();
     
+    const onLoadSystemAMock = jest.fn();
+    const onLoadSystemBMock = jest.fn();
+    
+    const onDestroySystemAMock = jest.fn();
+    const onDestroySystemBMock = jest.fn();
+    
     const systemA: SystemFunction = () => ({
         id: 'SYSTEM_A',
         components: ['COMPONENT_A'],
         onAdd: onAddSystemAMock,
         onUpdate: onUpdateSystemAMock,
-        onRemove: onRemoveSystemAMock
+        onRemove: onRemoveSystemAMock,
+        onLoad: onLoadSystemAMock,
+        onDestroy: onDestroySystemAMock
     });
     const systemB: SystemFunction = () => ({
         id: 'SYSTEM_B',
         components: ['COMPONENT_A', 'COMPONENT_B'],
         onAdd: onAddSystemBMock,
         onUpdate: onUpdateSystemBMock,
-        onRemove: onRemoveSystemBMock
+        onRemove: onRemoveSystemBMock,
+        onLoad: onLoadSystemBMock,
+        onDestroy: onDestroySystemBMock
     });
     Game.setSystems(systemA, systemB);
     
@@ -96,6 +106,22 @@ describe('System', () => {
             entityA.removeComponent('COMPONENT_A');
         
             expect(onRemoveSystemAMock).toBeCalledWith(entityA.id);
+        });
+    });
+    
+    describe('onLoad', () => {
+        test('expect onLoad to be called inside system', () => {
+            Game.load();
+            expect(onLoadSystemAMock).toBeCalled()
+            expect(onLoadSystemBMock).toBeCalled()
+        });
+    });
+    
+    describe('onDestroy', () => {
+        test('expect onDestroy to be called inside system', () => {
+            Game.destroy();
+            expect(onDestroySystemAMock).toBeCalled()
+            expect(onDestroySystemBMock).toBeCalled()
         });
     });
     

@@ -5,9 +5,6 @@ describe('Game', () => {
     
     const Game = game();
     
-    const onLoadMock = jest.fn();
-    const onDestroyMock = jest.fn();
-    
     test('expect Game.getUID to be 1', () => {
         expect(Game.getUID()).toBe(1);
     });
@@ -29,13 +26,6 @@ describe('Game', () => {
         
         const foundSystem = Game.getSystem('SYSTEM');
         expect(foundSystem).not.toBeUndefined();
-    });
-    
-    test('expect Game.load to be called', () => {
-        Game.onLoad(onLoadMock);
-        
-        Game.load();
-        expect(onLoadMock).toBeCalled()
     });
     
     test('expect Game.getEntityList to have 0 elements', () => {
@@ -90,10 +80,4 @@ describe('Game', () => {
         expect(Game.getEntityListByComponents('C1', 'C2')).toHaveLength(1);
     });
     
-    test('expect Game.destroy to be called', () => {
-        Game.onDestroy(onDestroyMock);
-        
-        Game.destroy();
-        expect(onDestroyMock).toBeCalled()
-    });
 });
