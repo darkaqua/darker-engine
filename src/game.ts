@@ -241,11 +241,11 @@ export const game: GameFunction = () => {
     }
 
     const load = () => {
-        systems.forEach(system => system?.onLoad && system?.onLoad());
+        systems.forEach(system => system?.onLoad?.());
     }
 
     const destroy = () => {
-        systems.forEach(system => system?.onDestroy && system?.onDestroy());
+        systems.forEach(system => system?.onDestroy?.());
         removeEntity(...Object.values(entityList).map(entity => entity.id).reverse());
         clear();
     }
