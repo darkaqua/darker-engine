@@ -1,3 +1,2 @@
-
-export * from './game';
-export * from './types';
+export * from "./game.ts";
+export * from "./types.ts";
