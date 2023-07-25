@@ -6,12 +6,23 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        deno-version: [ 1.35.2 ]
 
     steps:
       - uses: actions/checkout@v3
-      - name: Install modules
-        run: yarn
-      - name: Run tests
-        run: yarn run test
-      - name: Build
-        run: yarn run build
+      - name: Use Deno Version ${{ matrix.deno-version }}
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: ${{ matrix.deno-version }}
+      - name: Deno fmt
+        run: deno fmt --check
+#      - name: Deno lint
+#        run: deno lint
+      - name: Build Deno Module
+        run: deno run --reload mod.ts
+      - name: Test Deno Module
+        run: deno test --allow-none --coverage=coverage
+      - name: Create coverage report
+        run: deno coverage ./coverage --lcov > coverage.lcov
