@@ -95,7 +95,7 @@ export const engine: EngineFunction = () => {
       })
       .forEach((system) => {
         try {
-          system.onUpdate && system.onUpdate(entityId, component);
+          system?.onUpdate?.(entityId, component);
         } catch (e) {
           console.warn(
             `Error catch system::${system.id} "onUpdate(${entityId}, ${component})"`,
@@ -270,7 +270,7 @@ export const engine: EngineFunction = () => {
             entity.id,
           ]);
           try {
-            system?.onAdd && system.onAdd(entity.id);
+            system?.onAdd?.(entity.id);
           } catch (e) {
             console.warn(
               `Error catch system::${system.id} "onUpdate(${entity.id})"`,
