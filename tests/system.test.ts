@@ -6,6 +6,7 @@ import {
   assertSpyCall,
   assertSpyCallArg,
   assertSpyCallArgs,
+  assertSpyCalls,
   spy,
 } from "https://deno.land/std@0.195.0/testing/mock.ts";
 
@@ -52,72 +53,103 @@ Deno.test("System", async (test) => {
 
   const entityA = getEntity(Game.getUID(), 0, {}, ["COMPONENT_A"]);
 
-  await test.step("[system] expect systems to exist", () => {
+  await test.step("expect systems to exist", () => {
     assertNotEquals(Game.getSystem("SYSTEM_A"), undefined);
     assertNotEquals(Game.getSystem("SYSTEM_B"), undefined);
   });
 
-  await test.step("[onAdd] expect entity to be added on a system A but not system B", () => {
-    Game.addEntity(entityA);
+  await test.step("onAdd", async (t) => {
+    await t.step(
+      "expect entity to be added on a system A but not system B",
+      () => {
+        Game.addEntity(entityA);
 
-    assertSpyCallArg(onAddSystemAMock, 0, 0, entityA.id);
-    // expect(onAddSystemBMock).not.toBeCalledWith(entityA.id); // TODO: fix this on deno
+        assertSpyCallArg(onAddSystemAMock, 0, 0, entityA.id);
+        assertSpyCalls(onAddSystemBMock, 0);
+      },
+    );
   });
 
-  entityA?.removeComponent?.("COMPONENT_B");
-
-  await test.step("[onUpdate] expect entity to be updated on a system A and not to be called on system B", () => {
-    entityA?.updateComponent?.("COMPONENT_A", {});
-
-    assertSpyCallArgs(onUpdateSystemAMock, 0, 0, [entityA.id, "COMPONENT_A"]);
-    // expect(onUpdateSystemBMock).not.toBeCalledWith(entityA.id, 'COMPONENT_A'); // TODO: fix this on deno
-  });
-
-  await test.step("[onUpdate] expect add component on entity and be added on a system B", () => {
-    entityA?.updateComponent?.("COMPONENT_B", {});
-
-    assertSpyCallArg(onAddSystemBMock, 0, 0, entityA.id);
-  });
-
-  await test.step("[onUpdate] expect entity to be updated on system A and B", () => {
-    entityA?.updateComponent?.("COMPONENT_A", {});
-
-    assertSpyCallArgs(onUpdateSystemAMock, 0, 0, [entityA.id, "COMPONENT_A"]);
-    assertSpyCallArgs(onUpdateSystemBMock, 0, 0, [entityA.id, "COMPONENT_A"]);
-  });
-
-  await test.step("[onUpdate] expect entity to be updated only on system B", () => {
-    entityA?.updateComponent?.("COMPONENT_B", {});
-
-    // TODO: Check why this is not working on deno
-    // expect(onUpdateSystemAMock).not.toBeCalledWith(entityA.id, 'COMPONENT_B');
-    // expect(onUpdateSystemBMock).toBeCalledWith(entityA.id, 'COMPONENT_B');
-  });
-
-  await test.step("[onRemove] expect remove entity component and be removed from system B", () => {
+  await test.step("onUpdate", async (t) => {
     entityA?.removeComponent?.("COMPONENT_B");
 
-    // expect(onRemoveSystemAMock).not.toBeCalledWith(entityA.id); // TODO: fix this on deno
-    assertSpyCallArg(onRemoveSystemBMock, 0, 0, entityA.id);
+    await t.step(
+      "expect entity to be updated on a system A and not to be called on system B",
+      () => {
+        entityA?.updateComponent?.("COMPONENT_A", {});
+
+        assertSpyCallArgs(onUpdateSystemAMock, 0, 0, [
+          entityA.id,
+          "COMPONENT_A",
+        ]);
+        assertSpyCalls(onUpdateSystemBMock, 0);
+      },
+    );
+
+    await t.step(
+      "expect add component on entity and be added on a system B",
+      () => {
+        entityA?.updateComponent?.("COMPONENT_B", {});
+
+        assertSpyCallArg(onAddSystemBMock, 0, 0, entityA.id);
+      },
+    );
+
+    await t.step("expect entity to be updated on system A and B", () => {
+      entityA?.updateComponent?.("COMPONENT_A", {});
+
+      assertSpyCallArgs(onUpdateSystemAMock, 0, 0, [entityA.id, "COMPONENT_A"]);
+      assertSpyCallArgs(onUpdateSystemBMock, 0, 0, [entityA.id, "COMPONENT_A"]);
+    });
+
+    await t.step("expect entity to be updated only on system B", () => {
+      entityA?.updateComponent?.("COMPONENT_B", {});
+
+      // TODO: Check why this test is failing
+      // expect(onUpdateSystemAMock).not.toBeCalledWith(entityA.id, 'COMPONENT_B');
+      // expect(onUpdateSystemBMock).toBeCalledWith(entityA.id, 'COMPONENT_B');
+      
+      // assertSpyCalls(onUpdateSystemAMock, 0);
+      // assertSpyCallArgs(onUpdateSystemBMock, 0, 0, [entityA.id, 'COMPONENT_B']);
+    });
   });
 
-  await test.step("[onRemove] expect remove entity component and be removed from system A", () => {
-    entityA?.removeComponent?.("COMPONENT_A");
+  await test.step("onRemove", async (t) => {
+    await t.step(
+      "expect remove entity component and be removed from system B",
+      () => {
+        entityA?.removeComponent?.("COMPONENT_B");
 
-    assertSpyCallArg(onRemoveSystemAMock, 0, 0, entityA.id);
+        assertSpyCalls(onRemoveSystemAMock, 0);
+        assertSpyCallArg(onRemoveSystemBMock, 0, 0, entityA.id);
+      },
+    );
+
+    await t.step(
+      "expect remove entity component and be removed from system A",
+      () => {
+        entityA?.removeComponent?.("COMPONENT_A");
+
+        assertSpyCallArg(onRemoveSystemAMock, 0, 0, entityA.id);
+      },
+    );
   });
 
-  await test.step("[onLoad] expect onLoad to be called inside system", () => {
-    Game.load();
+  await test.step("onLoad", async (t) => {
+    await t.step("expect onLoad to be called inside system", () => {
+      Game.load();
 
-    assertSpyCall(onLoadSystemAMock, 0);
-    assertSpyCall(onLoadSystemBMock, 0);
+      assertSpyCall(onLoadSystemAMock, 0);
+      assertSpyCall(onLoadSystemBMock, 0);
+    });
   });
 
-  await test.step("[onDestroy] expect onDestroy to be called inside system", () => {
-    Game.destroy();
+  await test.step("onDestroy", async (t) => {
+    await t.step("expect onDestroy to be called inside system", () => {
+      Game.destroy();
 
-    assertSpyCall(onDestroySystemAMock, 0);
-    assertSpyCall(onDestroySystemBMock, 0);
+      assertSpyCall(onDestroySystemAMock, 0);
+      assertSpyCall(onDestroySystemBMock, 0);
+    });
   });
 });
