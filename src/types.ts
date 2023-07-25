@@ -1,7 +1,7 @@
 /**
- * Game
+ * Engine
  */
-export interface GameType {
+export interface EngineType {
   setSystems: (...systems: SystemFunction[]) => any;
 
   getEntityList: () => EntityType[];
@@ -22,7 +22,7 @@ export interface GameType {
   getUID: () => number;
 }
 
-export type GameFunction = () => GameType;
+export type EngineFunction = () => EngineType;
 
 /**
  * System

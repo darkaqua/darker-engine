@@ -1,12 +1,12 @@
 import {
+  EngineFunction,
   EntityType,
-  GameFunction,
   SystemFunction,
   SystemType,
 } from "./types.ts";
 import { uid } from "./uid.ts";
 
-export const game: GameFunction = () => {
+export const engine: EngineFunction = () => {
   let systems: SystemType[] = [];
   let entityList: Record<string, EntityType> = {};
   let typeEntityMap: Record<number, number[]> = {};

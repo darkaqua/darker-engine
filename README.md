@@ -10,18 +10,35 @@ Lightweight functional library implementation of the
 [Entity-Component-System](https://en.wikipedia.org/wiki/Entity_component_system)
 pattern with typescript.
 
+## Installation
+
+### Deno
+Import the package with deno:
+
+```ts
+import { engine as darkerEngine } from "https://deno.land/_TODO_/mod.ts";
+```
+
+### npm
+Install the package with npm:
+
+```bash
+npm install darker-engine
+```
+
+
 ### Code Example
 
 #### Declaration
 
 ```ts
-import { game as darkerGame } from "darker-engine";
+import { engine as darkerEngine } from "darker-engine";
 
-export const Game = darkerGame();
+export const Engine = darkerEngine();
 
-Game.setSystems(...[]);
+Engine.setSystems(...[]);
 
-Game.load();
+Engine.load();
 ```
 
 #### Enums
@@ -42,7 +59,7 @@ enum Components {
 import { EntityType } from "darker-engine";
 
 const exampleEntity = (): EntityType => ({
-  id: Game.getUID(),
+  id: Engine.getUID(),
   type: EntityType.EXAMPLE,
   data: {},
   components: [],
@@ -71,9 +88,9 @@ const exampleSystem: SystemFunction = () => {
 #### Full code
 
 ```ts
-import { EntityType, game as darkerGame, SystemFunction } from "darker-engine";
+import { EntityType, engine as darkerEngine, SystemFunction } from "darker-engine";
 
-export const Game = darkerGame();
+export const Engine = darkerEngine();
 
 enum EntityType {
   EXAMPLE,
@@ -84,7 +101,7 @@ enum Components {
 }
 
 const exampleEntity = (): EntityType => ({
-  id: Game.getUID(),
+  id: Engine.getUID(),
   type: EntityType.EXAMPLE,
   data: {
     [Components.EXAMPLE_COMPONENT]: {
@@ -99,14 +116,14 @@ const exampleEntity = (): EntityType => ({
 const exampleSystem: SystemFunction = () => {
   let interval;
 
-  Game.onLoad(() => {
+  Engine.onLoad(() => {
     console.log("welcome!");
-    Game.addEntity(exampleEntity());
+    Engine.addEntity(exampleEntity());
 
     interval = setInterval(() => {
-      const entityList = Game.getEntityList();
-      const entityListByType = Game.getEntityListByType(EntityType.EXAMPLE);
-      const entityListByComponents = Game.getEntityListByComponents(
+      const entityList = Engine.getEntityList();
+      const entityListByType = Engine.getEntityListByType(EntityType.EXAMPLE);
+      const entityListByComponents = Engine.getEntityListByComponents(
         Components.EXAMPLE_COMPONENT,
       );
 
@@ -117,18 +134,18 @@ const exampleSystem: SystemFunction = () => {
     }, 5_000);
   });
 
-  Game.onDestroy(() => {
+  Engine.onDestroy(() => {
     clearInterval(interval);
     console.log("bye!");
   });
 
   const onAdd = (entityId: number) => {
-    const entity = Game.getEntity(id);
+    const entity = Engine.getEntity(id);
     entity.updateComponent(Components.EXAMPLE_COMPONENT, { foo: "fii" });
   };
 
   const onUpdate = (entityId: number, component: string) => {
-    const entity = Game.getEntity(id);
+    const entity = Engine.getEntity(id);
 
     if (component !== Components.EXAMPLE_COMPONENT) return;
 
@@ -139,7 +156,7 @@ const exampleSystem: SystemFunction = () => {
   };
 
   const onRemove = (entityId: number) => {
-    Game.removeEntity(entityId);
+    Engine.removeEntity(entityId);
   };
 
   return {
@@ -152,6 +169,6 @@ const exampleSystem: SystemFunction = () => {
   };
 };
 
-Game.setSystems(exampleSystem);
-Game.load();
+Engine.setSystems(exampleSystem);
+Engine.load();
 ```

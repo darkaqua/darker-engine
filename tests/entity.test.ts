@@ -4,11 +4,11 @@ import {
 } from "https://deno.land/std@0.195.0/testing/asserts.ts";
 import { spy } from "https://deno.land/std@0.195.0/testing/mock.ts";
 
-import { game, SystemFunction } from "../src/index.ts";
+import { engine, SystemFunction } from "../src/index.ts";
 import { getEntity } from "./utils.ts";
 
 Deno.test("Entity", async (test) => {
-  const Game = game();
+  const Engine = engine();
 
   const onAddSystemAMock = spy(() => {});
   const onAddSystemBMock = spy(() => {});
@@ -23,21 +23,21 @@ Deno.test("Entity", async (test) => {
     components: ["COMPONENT_A", "COMPONENT_B"],
     onAdd: onAddSystemBMock,
   });
-  Game.setSystems(systemA, systemB);
+  Engine.setSystems(systemA, systemB);
 
-  const entityA = getEntity(Game.getUID(), 0);
+  const entityA = getEntity(Engine.getUID(), 0);
 
   await test.step("expect add an entity", () => {
-    Game.addEntity(entityA);
+    Engine.addEntity(entityA);
 
-    const retrievedEntity = Game.getEntity(entityA.id);
+    const retrievedEntity = Engine.getEntity(entityA.id);
     assertEquals(retrievedEntity.id, entityA.id);
   });
 
   await test.step("expect remove an entity", () => {
-    Game.removeEntity(entityA.id);
+    Engine.removeEntity(entityA.id);
 
-    const retrievedEntity = Game.getEntity(entityA.id);
+    const retrievedEntity = Engine.getEntity(entityA.id);
     assertEquals(retrievedEntity, undefined);
   });
 
@@ -50,7 +50,7 @@ Deno.test("Entity", async (test) => {
   };
 
   await test.step("expect update component data", () => {
-    Game.addEntity(entityA);
+    Engine.addEntity(entityA);
 
     entityA?.updateComponent?.("COMPONENT_A", componentData);
 

@@ -10,11 +10,11 @@ import {
   spy,
 } from "https://deno.land/std@0.195.0/testing/mock.ts";
 
-import { game, SystemFunction } from "../src/index.ts";
+import { engine, SystemFunction } from "../src/index.ts";
 import { getEntity } from "./utils.ts";
 
 Deno.test("System", async (test) => {
-  const Game = game();
+  const Engine = engine();
 
   const onAddSystemAMock = spy(() => {});
   const onAddSystemBMock = spy(() => {});
@@ -49,20 +49,20 @@ Deno.test("System", async (test) => {
     onLoad: onLoadSystemBMock,
     onDestroy: onDestroySystemBMock,
   });
-  Game.setSystems(systemA, systemB);
+  Engine.setSystems(systemA, systemB);
 
-  const entityA = getEntity(Game.getUID(), 0, {}, ["COMPONENT_A"]);
+  const entityA = getEntity(Engine.getUID(), 0, {}, ["COMPONENT_A"]);
 
   await test.step("expect systems to exist", () => {
-    assertNotEquals(Game.getSystem("SYSTEM_A"), undefined);
-    assertNotEquals(Game.getSystem("SYSTEM_B"), undefined);
+    assertNotEquals(Engine.getSystem("SYSTEM_A"), undefined);
+    assertNotEquals(Engine.getSystem("SYSTEM_B"), undefined);
   });
 
   await test.step("onAdd", async (t) => {
     await t.step(
       "expect entity to be added on a system A but not system B",
       () => {
-        Game.addEntity(entityA);
+        Engine.addEntity(entityA);
 
         assertSpyCallArg(onAddSystemAMock, 0, 0, entityA.id);
         assertSpyCalls(onAddSystemBMock, 0);
@@ -108,7 +108,7 @@ Deno.test("System", async (test) => {
       // TODO: Check why this test is failing
       // expect(onUpdateSystemAMock).not.toBeCalledWith(entityA.id, 'COMPONENT_B');
       // expect(onUpdateSystemBMock).toBeCalledWith(entityA.id, 'COMPONENT_B');
-      
+
       // assertSpyCalls(onUpdateSystemAMock, 0);
       // assertSpyCallArgs(onUpdateSystemBMock, 0, 0, [entityA.id, 'COMPONENT_B']);
     });
@@ -137,7 +137,7 @@ Deno.test("System", async (test) => {
 
   await test.step("onLoad", async (t) => {
     await t.step("expect onLoad to be called inside system", () => {
-      Game.load();
+      Engine.load();
 
       assertSpyCall(onLoadSystemAMock, 0);
       assertSpyCall(onLoadSystemBMock, 0);
@@ -146,7 +146,7 @@ Deno.test("System", async (test) => {
 
   await test.step("onDestroy", async (t) => {
     await t.step("expect onDestroy to be called inside system", () => {
-      Game.destroy();
+      Engine.destroy();
 
       assertSpyCall(onDestroySystemAMock, 0);
       assertSpyCall(onDestroySystemBMock, 0);
