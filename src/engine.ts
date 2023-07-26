@@ -169,7 +169,7 @@ export const engine: EngineFunction = () => {
     entityComponentMap[entityId]?.includes(component);
 
   const _entity_getData = (entityId: number) =>
-    JSON.parse(JSON.stringify(entityDataMap.get(entityId)));
+   structuredClone(entityDataMap.get(entityId));
 
   const getEntityList = (): EntityType[] => Object.values(entityList) || [];
 
