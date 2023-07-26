@@ -62,7 +62,7 @@ export interface EntityType {
 }
 
 export type UpdateComponentFunctionType = <ComponentType>(
-  component: string,
+  component: unknown,
   data: ComponentType,
 ) => void;
 export type RemoveComponentFunctionType = (component: string) => void;
