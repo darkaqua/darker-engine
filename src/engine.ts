@@ -8,34 +8,29 @@ import { uid } from "./uid.ts";
 
 export const engine: EngineFunction = () => {
   let systems: SystemType[] = [];
-  let entityList: Record<string, EntityType> = {};
-  let typeEntityMap: Record<number, number[]> = {};
-  let entityComponentMap: Record<number, string[]> = {};
+  let entityList: EntityType[] = [];
+  let typeEntityMap: number[][] = [];
+  let entityComponentMap: number[][] = [];
   // Contains which components/data has every entity
-  let entityDataMap = new Map<number, any>();
+  let entityDataMap: any[] = [];
   // Contains which entities has every system
-  let systemEntitiesMap = new Map<string, number[]>();
+  let systemEntitiesMap: number[][] = [];
 
   const { getUID } = uid();
 
   const setSystems = (..._systems: SystemFunction[]) => {
-    systemEntitiesMap = new Map<string, number[]>();
-    systems = _systems.map((system) => {
-      let systemId = `SYSTEM_${getUID()}`;
+    systems = [];
+    systemEntitiesMap = [];
+
+    _systems.forEach((system) => {
       const _system = system();
-      // Sets id if declared
-      if (_system.id) {
-        systemId = _system.id;
-      }
-      _system.id = systemId;
-
-      systemEntitiesMap.set(systemId, []);
-
-      return _system;
+      _system.id = _system.id ?? getUID();
+      systemEntitiesMap[_system.id] = [];
+      systems[_system.id] = _system;
     });
   };
 
-  const _entity_removeComponent = (entityId: number, component: string) => {
+  const _entity_removeComponent = (entityId: number, component: number) => {
     const entity = getEntity(entityId);
     entityComponentMap[entityId] = entityComponentMap[entityId].filter(
       (_component) => _component !== component,
@@ -43,7 +38,7 @@ export const engine: EngineFunction = () => {
 
     systems
       .filter((system) => {
-        const entities = systemEntitiesMap.get(system.id);
+        const entities = systemEntitiesMap[system.id];
         return entities?.includes(entityId) ?? false;
       })
       .filter((system) =>
@@ -53,10 +48,11 @@ export const engine: EngineFunction = () => {
       )
       .reverse()
       .forEach((system) => {
-        const entities = systemEntitiesMap.get(system.id);
-        const entitiesFiltered = entities?.filter((_id) => _id !== entityId) ??
+        const entities = systemEntitiesMap[system.id];
+        systemEntitiesMap[system.id] = entities?.filter((_id) =>
+          _id !== entityId
+        ) ??
           [];
-        systemEntitiesMap.set(system.id, entitiesFiltered);
         try {
           system?.onRemove?.(entityId);
         } catch (e) {
@@ -72,25 +68,25 @@ export const engine: EngineFunction = () => {
 
   const _entity_updateComponent = (
     entityId: number,
-    component: string,
-    data: any = {},
+    component: number,
+    data = {},
   ) => {
     const entity = getEntity(entityId);
     if (!entityComponentMap[entityId]?.includes(component)) {
       return _entity_addComponent(entityId, component, data);
     }
 
-    const currentData = entityDataMap.get(entity.id);
-    entityDataMap.set(entity.id, {
+    const currentData = entityDataMap[entity.id];
+    entityDataMap[entity.id] = {
       ...currentData,
       [component]: { ...(currentData[component] || {}), ...data },
-    });
+    };
 
     systems
       //Only filters the current updated component
       .filter((system) => system.components.includes(component))
       .filter((system) => {
-        const entities = systemEntitiesMap.get(system.id);
+        const entities = systemEntitiesMap[system.id];
         return entities?.includes(entityId) ?? false;
       })
       .forEach((system) => {
@@ -109,22 +105,22 @@ export const engine: EngineFunction = () => {
 
   const _entity_addComponent = (
     entityId: number,
-    component: string,
-    data: any = {},
+    component: number,
+    data = {},
   ) => {
     const entity = getEntity(entityId);
 
     entityComponentMap[entity.id].push(component);
-    entityDataMap.set(entity.id, {
-      ...entityDataMap.get(entity.id),
+    entityDataMap[entity.id] = {
+      ...entityDataMap[entity.id],
       [component]: data,
-    });
+    };
 
     systems
       .filter((system) => system.components.includes(component))
       // Cuando los sistemas no contengan la entidad actual
       .filter((system) => {
-        const entities = systemEntitiesMap.get(system.id);
+        const entities = systemEntitiesMap[system.id];
         return !entities?.includes(entityId) ?? true;
       })
       // Cuando la entidad tenga los componentes correspondientes a ese sistema
@@ -134,8 +130,8 @@ export const engine: EngineFunction = () => {
         )
       )
       .forEach((system) => {
-        const entities = systemEntitiesMap.get(system.id);
-        systemEntitiesMap.set(system.id, [...(entities ?? []), entityId]);
+        const entities = systemEntitiesMap[system.id];
+        systemEntitiesMap[system.id] = [...(entities ?? []), entityId];
         try {
           system?.onAdd?.(entityId);
         } catch (e) {
@@ -152,10 +148,10 @@ export const engine: EngineFunction = () => {
 
   const _entity_getComponent = (
     entityId: number,
-    component: any,
-    deepClone: boolean = false,
+    component: number,
+    deepClone = false,
   ) => {
-    const entityData = entityDataMap.get(entityId);
+    const entityData = entityDataMap[entityId];
     return entityData && entityData[component]
       ? (
         deepClone
@@ -169,7 +165,7 @@ export const engine: EngineFunction = () => {
     entityComponentMap[entityId]?.includes(component);
 
   const _entity_getData = (entityId: number) =>
-   structuredClone(entityDataMap.get(entityId));
+    structuredClone(entityDataMap[entityId]);
 
   const getEntityList = (): EntityType[] => Object.values(entityList) || [];
 
@@ -177,11 +173,21 @@ export const engine: EngineFunction = () => {
     typeEntityMap[type]?.map((entityId) => entityList[entityId]) || [];
 
   const getEntityListByComponents = (
-    ...componentList: string[]
+    ...componentList: number[]
   ): EntityType[] => {
-    const entityIdList = Object.keys(entityComponentMap);
-    return Object.values(entityComponentMap).reduce(
-      (currentEntityList, entityComponents, index) => {
+    const entityIdList = entityComponentMap.reduce(
+      (acc: number[], element: number[], index: number) => {
+        if (element !== null) {
+          acc.push(index);
+        }
+        return acc;
+      },
+      [],
+    );
+
+    return entityIdList.reduce(
+      (currentEntityList, entityId, index) => {
+        const entityComponents = entityComponentMap[entityId];
         if (
           componentList.length === 0 ||
           componentList.every((component) =>
@@ -214,8 +220,7 @@ export const engine: EngineFunction = () => {
       entity.removeComponent = (component) =>
         _entity_removeComponent(entity.id, component);
       entity.updateComponent = (component, data) =>
-        _entity_updateComponent(entity.id, component, data);
-
+        _entity_updateComponent(entity.id, component, data as any);
 
       if (!typeEntityMap[entity.type]) {
         typeEntityMap[entity.type] = [];
@@ -224,13 +229,10 @@ export const engine: EngineFunction = () => {
 
       entityComponentMap[entity.id] = entity.components;
 
-      const entityData = entity?.getComponents?.().reduce((a, b) => ({
+      entityDataMap[entity.id] = entity?.getComponents?.().reduce((a, b) => ({
         ...a,
         [b]: a[b] || {},
       }), entity.data) ?? {};
-
-      entityDataMap.set(entity.id, entityData);
-
       entityList[entity.id] = entity;
     });
 
@@ -255,11 +257,11 @@ export const engine: EngineFunction = () => {
         )
         .map(({ system }) => system)
         .forEach((system) => {
-          const systemEntities = systemEntitiesMap.get(system.id);
-          systemEntitiesMap.set(system.id, [
+          const systemEntities = systemEntitiesMap[system.id];
+          systemEntitiesMap[system.id] = [
             ...(systemEntities ?? []),
             entity.id,
-          ]);
+          ];
           try {
             system?.onAdd?.(entity.id);
           } catch (e) {
@@ -273,9 +275,7 @@ export const engine: EngineFunction = () => {
     const ms = Date.now() - date;
     if (ms > 500) {
       console.warn(
-        `addEntity ${ms}ms addedEntities:${entities.length} totalEntities:${
-          Object.keys(entityList).length
-        }`,
+        `addEntity ${ms}ms addedEntities:${entities.length} totalEntities:${entityList.length}`,
       );
     }
     return entities;
@@ -316,11 +316,10 @@ export const engine: EngineFunction = () => {
             );
             console.error(e);
           }
-          const systemEntities = systemEntitiesMap.get(system.id);
-          systemEntitiesMap.set(
-            system.id,
-            systemEntities?.filter((_id) => _id !== entity.id) ?? [],
-          );
+          const systemEntities = systemEntitiesMap[system.id];
+          systemEntitiesMap[system.id] = systemEntities?.filter((_id) =>
+            _id !== entity.id
+          ) ?? [];
         });
       delete entityList[entity.id];
 
@@ -332,13 +331,15 @@ export const engine: EngineFunction = () => {
     });
   };
 
-  const getSystem = (name: string) =>
-    systems.find((system) => system.id === name);
+  const getSystem = (id: number) => systems[id];
 
   const clear = () => {
-    entityList = {};
-    entityDataMap = new Map<number, any>();
-    systemEntitiesMap = new Map<string, number[]>();
+    systems = [];
+    entityList = [];
+    typeEntityMap = [];
+    entityComponentMap = [];
+    entityDataMap = [];
+    systemEntitiesMap = [];
   };
 
   const load = () => {

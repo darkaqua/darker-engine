@@ -13,6 +13,7 @@ pattern with typescript.
 ## Installation
 
 ### Deno
+
 Import the package with deno:
 
 ```ts
@@ -20,12 +21,12 @@ import { engine as darkerEngine } from "https://deno.land/_TODO_/mod.ts";
 ```
 
 ### npm
+
 Install the package with npm:
 
 ```bash
 npm install darker-engine
 ```
-
 
 ### Code Example
 
@@ -88,7 +89,11 @@ const exampleSystem: SystemFunction = () => {
 #### Full code
 
 ```ts
-import { EntityType, engine as darkerEngine, SystemFunction } from "darker-engine";
+import {
+  engine as darkerEngine,
+  EntityType,
+  SystemFunction,
+} from "darker-engine";
 
 export const Engine = darkerEngine();
 

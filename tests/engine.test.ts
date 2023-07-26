@@ -5,7 +5,7 @@ import {
 } from "https://deno.land/std@0.195.0/testing/asserts.ts";
 
 import { engine, SystemFunction } from "../src/index.ts";
-import { getEntity } from "./utils.ts";
+import {Component, getEntity, System} from "./utils.ts";
 
 Deno.test("Engine", async (test) => {
   const Engine = engine();
@@ -19,17 +19,17 @@ Deno.test("Engine", async (test) => {
   });
 
   await test.step("expect Engine.getSystem to be undefined", () => {
-    assertEquals(Engine.getSystem("SYSTEM_A"), undefined);
+    assertEquals(Engine.getSystem(System.SYSTEM_A), undefined);
   });
 
   await test.step("expect Engine.setSystems to add a system", () => {
     const system: SystemFunction = () => ({
-      id: "SYSTEM",
+      id: System.SYSTEM_B,
       components: [],
     });
     Engine.setSystems(system);
 
-    const foundSystem = Engine.getSystem("SYSTEM");
+    const foundSystem = Engine.getSystem(System.SYSTEM_B);
     assertNotEquals(foundSystem, undefined);
   });
 
@@ -40,11 +40,11 @@ Deno.test("Engine", async (test) => {
   await test.step("expect Engine.getEntityList to have 6 element", () => {
     Engine.addEntity(
       getEntity(Engine.getUID(), 0, {}, []),
-      getEntity(Engine.getUID(), 0, {}, ["C1"]),
+      getEntity(Engine.getUID(), 0, {}, [Component.COMPONENT_A]),
       getEntity(Engine.getUID(), 1, {}, []),
-      getEntity(Engine.getUID(), 1, {}, ["C1"]),
-      getEntity(Engine.getUID(), 2, {}, ["C1", "C2"]),
-      getEntity(Engine.getUID(), 3, {}, ["C2"]),
+      getEntity(Engine.getUID(), 1, {}, [Component.COMPONENT_A]),
+      getEntity(Engine.getUID(), 2, {}, [Component.COMPONENT_A, Component.COMPONENT_B]),
+      getEntity(Engine.getUID(), 3, {}, [Component.COMPONENT_B]),
     );
     assert(Engine.getEntityList().length === 6);
   });
@@ -70,18 +70,18 @@ Deno.test("Engine", async (test) => {
   });
 
   await test.step("expect Engine.getEntityListByComponents with a fake component to have 0 entity", () => {
-    assertEquals(Engine.getEntityListByComponents("NOT_VALID"), []);
+    assertEquals(Engine.getEntityListByComponents(Component.COMPONENT_C), []);
   });
 
   await test.step("expect Engine.getEntityListByComponents with a component `C1` to have 3 entity", () => {
-    assert(Engine.getEntityListByComponents("C1").length === 3);
+    assert(Engine.getEntityListByComponents(Component.COMPONENT_A).length === 3);
   });
 
   await test.step("expect Engine.getEntityListByComponents with a component `C2` to have 2 entity", () => {
-    assert(Engine.getEntityListByComponents("C2").length === 2);
+    assert(Engine.getEntityListByComponents(Component.COMPONENT_B).length === 2);
   });
 
   await test.step("expect Engine.getEntityListByComponents with a component `C1` and `C2` to have 1 entity", () => {
-    assert(Engine.getEntityListByComponents("C1", "C2").length === 1);
+    assert(Engine.getEntityListByComponents(Component.COMPONENT_A, Component.COMPONENT_B).length === 1);
   });
 });

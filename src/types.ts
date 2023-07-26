@@ -2,17 +2,17 @@
  * Engine
  */
 export interface EngineType {
-  setSystems: (...systems: SystemFunction[]) => any;
+  setSystems: (...systems: SystemFunction[]) => void;
 
   getEntityList: () => EntityType[];
   getEntityListByType: (type: number) => EntityType[];
-  getEntityListByComponents: (...componentList: unknown[]) => EntityType[];
+  getEntityListByComponents: (...componentList: number[]) => EntityType[];
 
   getEntity: (id: number) => EntityType;
   addEntity: (...entities: EntityType[]) => EntityType[];
   removeEntity: (...idList: number[]) => void;
 
-  getSystem: (name: string) => SystemType | undefined;
+  getSystem: (name: number) => SystemType | undefined;
 
   clear: () => void;
 
@@ -28,10 +28,10 @@ export type EngineFunction = () => EngineType;
  * System
  */
 export interface SystemType {
-  id: string;
-  components: unknown[];
+  id: number;
+  components: number[];
   onAdd?: (id: number) => void;
-  onUpdate?: (id: number, component?: unknown) => void;
+  onUpdate?: (id: number, component?: number) => void;
   onRemove?: (id: number) => void;
 
   onLoad?: () => void;
@@ -47,22 +47,22 @@ export interface EntityType {
   //Only initial declaration
   readonly id: number;
   readonly type: number;
-  readonly data: Record<unknown, Object>;
-  readonly components: unknown[];
+  readonly data: Record<number, any>;
+  readonly components: number[];
 
-  getData?: () => Record<unknown, Object>;
+  getData?: () => Record<number, any>;
   getComponent?: <ComponentType>(
-    component: unknown,
+    component: number,
     deepClone?: boolean,
   ) => ComponentType;
-  getComponents?: () => unknown[];
-  hasComponent?: (component: unknown) => boolean;
+  getComponents?: () => number[];
+  hasComponent?: (component: number) => boolean;
   updateComponent?: UpdateComponentFunctionType;
   removeComponent?: RemoveComponentFunctionType;
 }
 
 export type UpdateComponentFunctionType = <ComponentType>(
-  component: unknown,
+  component: number,
   data: ComponentType,
 ) => void;
-export type RemoveComponentFunctionType = (component: unknown) => void;
+export type RemoveComponentFunctionType = (component: number) => void;

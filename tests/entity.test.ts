@@ -5,7 +5,7 @@ import {
 import { spy } from "https://deno.land/std@0.195.0/testing/mock.ts";
 
 import { engine, SystemFunction } from "../src/index.ts";
-import { getEntity } from "./utils.ts";
+import {Component, getEntity, System} from "./utils.ts";
 
 Deno.test("Entity", async (test) => {
   const Engine = engine();
@@ -14,13 +14,13 @@ Deno.test("Entity", async (test) => {
   const onAddSystemBMock = spy(() => {});
 
   const systemA: SystemFunction = () => ({
-    id: "SYSTEM_A",
-    components: ["COMPONENT_A"],
+    id: System.SYSTEM_A,
+    components: [Component.COMPONENT_A],
     onAdd: onAddSystemAMock,
   });
   const systemB: SystemFunction = () => ({
-    id: "SYSTEM_B",
-    components: ["COMPONENT_A", "COMPONENT_B"],
+    id: System.SYSTEM_B,
+    components: [Component.COMPONENT_A, Component.COMPONENT_B],
     onAdd: onAddSystemBMock,
   });
   Engine.setSystems(systemA, systemB);
@@ -52,13 +52,13 @@ Deno.test("Entity", async (test) => {
   await test.step("expect update component data", () => {
     Engine.addEntity(entityA);
 
-    entityA?.updateComponent?.("COMPONENT_A", componentData);
+    entityA?.updateComponent?.(Component.COMPONENT_A, componentData);
 
-    assertEquals(entityA?.getComponent?.("COMPONENT_A"), componentData);
+    assertEquals(entityA?.getComponent?.(Component.COMPONENT_A), componentData);
   });
 
   await test.step("expect entity raw data to contain data", () => {
-    assertEquals(entityA?.getData?.(), { "COMPONENT_A": componentData });
+    assertEquals(entityA?.getData?.(), { [Component.COMPONENT_A]: componentData });
   });
 
   await test.step("expect to add new component to an existing entity", () => {
@@ -66,9 +66,9 @@ Deno.test("Entity", async (test) => {
 
     const componentData = { foo: "faa", fii: 123 };
 
-    entityA?.updateComponent?.("NEW_COMPONENT", componentData);
+    entityA?.updateComponent?.(Component.COMPONENT_C, componentData);
 
-    assertEquals(entityA?.hasComponent?.("NEW_COMPONENT"), true);
-    assertEquals(entityA?.getComponent?.("NEW_COMPONENT"), componentData);
+    assertEquals(entityA?.hasComponent?.(Component.COMPONENT_C), true);
+    assertEquals(entityA?.getComponent?.(Component.COMPONENT_C), componentData);
   });
 });
