@@ -6,7 +6,7 @@ export interface EngineType {
 
   getEntityList: () => EntityType[];
   getEntityListByType: (type: number) => EntityType[];
-  getEntityListByComponents: (...componentList: string[]) => EntityType[];
+  getEntityListByComponents: (...componentList: unknown[]) => EntityType[];
 
   getEntity: (id: number) => EntityType;
   addEntity: (...entities: EntityType[]) => EntityType[];
