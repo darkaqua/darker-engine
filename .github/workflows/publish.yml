@@ -29,7 +29,7 @@ jobs:
           deno-version: ${{ matrix.deno-version }}
 
       - name: Convert Deno Module to NPM
-        run: deno run --allow-env --allow-read --allow-write --allow-run scripts/npm.ts ${{ github.ref_name }}
+        run: deno task build:npm ${{ github.ref_name }}
 
       - name: Install modules
         run: |

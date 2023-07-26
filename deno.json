@@ -1,0 +1,19 @@
+{
+  "tasks": {
+    "fmt:check": "deno fmt --check",
+    "build": "deno run --reload mod.ts",
+    "build:npm": "deno run --allow-env --allow-read --allow-write --allow-run scripts/npm.ts",
+    "test": "deno test --allow-none --coverage=coverage",
+    "coverage": "deno coverage ./coverage --lcov > coverage.lcov",
+    "test:coverage": "deno task test && deno task coverage"
+  },
+  "fmt": {
+    "useTabs": true,
+    "lineWidth": 100,
+    "semiColons": true,
+    "singleQuote": true,
+    "proseWrap": "preserve",
+    "include": ["scripts/", "src/", "tests/"],
+    "exclude": ["npm/"]
+  }
+}
