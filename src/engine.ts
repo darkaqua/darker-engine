@@ -1,9 +1,9 @@
 import { EngineFunction, EntityType, SystemFunction, SystemType } from './types.ts';
 import { uid } from './uid.ts';
 
-export const engine: EngineFunction = () => {
+export const engine: EngineFunction = <E,C extends string|number|symbol>() => {
 	let systems: SystemType[] = [];
-	let entityList: EntityType[] = [];
+	let entityList: EntityType<E,C>[] = [];
 	let typeEntityMap: number[][] = [];
 	let entityComponentMap: number[][] = [];
 	// Contains which components/data has every entity
@@ -25,7 +25,7 @@ export const engine: EngineFunction = () => {
 		});
 	};
 
-	const _entity_removeComponent = (entityId: number, component: number) => {
+	const _entity_removeComponent = (entityId: E, component: number) => {
 		const entity = getEntity(entityId);
 		entityComponentMap[entityId] = entityComponentMap[entityId].filter(
 			(_component) => _component !== component,
@@ -152,14 +152,14 @@ export const engine: EngineFunction = () => {
 
 	const _entity_getData = (entityId: number) => structuredClone(entityDataMap[entityId]);
 
-	const getEntityList = (): EntityType[] => Object.values(entityList) || [];
+	const getEntityList = (): EntityType<E,C>[] => Object.values(entityList) || [];
 
-	const getEntityListByType = (type: number): EntityType[] =>
+	const getEntityListByType = (type: number): EntityType<E,C>[] =>
 		typeEntityMap[type]?.map((entityId) => entityList[entityId]) || [];
 
 	const getEntityListByComponents = (
 		...componentList: number[]
-	): EntityType[] => {
+	): EntityType<E,C>[] => {
 		const entityIdList = entityComponentMap.reduce(
 			(acc: number[], element: number[], index: number) => {
 				if (element !== null) {
@@ -185,13 +185,13 @@ export const engine: EngineFunction = () => {
 
 				return currentEntityList;
 			},
-			Array<EntityType>(),
+			Array<EntityType<E,C>>(),
 		).filter(Boolean);
 	};
 
-	const getEntity = (entityId: number) => entityList[entityId];
+	const getEntity = (entityId: E) => entityList[entityId];
 
-	const addEntity = (...entities: EntityType[]): EntityType[] => {
+	const addEntity = (...entities: EntityType<E,C>[]): EntityType<E,C>[] => {
 		const date = Date.now();
 		entities.forEach((entity) => {
 			entity.getData = () => _entity_getData(entity.id);

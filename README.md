@@ -95,85 +95,85 @@ import {
   SystemFunction,
 } from "darker-engine";
 
-export const Engine = darkerEngine();
+export const Engine = darkerEngine()
 
-enum EntityType {
-  EXAMPLE,
+enum IEntities {
+  EXAMPLE_ENTITY,
 }
 
-enum Components {
-  EXAMPLE_COMPONENT = "EXAMPLE_COMPONENT",
+enum IComponents {
+  EXAMPLE_COMPONENT,
+  OTHER_COMPONENT,
 }
 
 const exampleEntity = (): EntityType => ({
   id: Engine.getUID(),
-  type: EntityType.EXAMPLE,
+  type: IEntities.EXAMPLE_ENTITY,
   data: {
-    [Components.EXAMPLE_COMPONENT]: {
+    [IComponents.EXAMPLE_COMPONENT]: {
       foo: "faa",
-    },
+    }
   },
-  components: [
-    Components.EXAMPLE_COMPONENT,
-  ],
-});
+  components: [IComponents.EXAMPLE_COMPONENT],
+})
 
 const exampleSystem: SystemFunction = () => {
-  let interval;
+  let interval: number
 
-  Engine.onLoad(() => {
+  const onLoad = () => {
     console.log("welcome!");
     Engine.addEntity(exampleEntity());
 
     interval = setInterval(() => {
       const entityList = Engine.getEntityList();
-      const entityListByType = Engine.getEntityListByType(EntityType.EXAMPLE);
+      const entityListByType = Engine.getEntityListByType(IEntities.EXAMPLE_ENTITY);
       const entityListByComponents = Engine.getEntityListByComponents(
-        Components.EXAMPLE_COMPONENT,
+        IComponents.EXAMPLE_COMPONENT,
       );
 
       console.log(`Entities`);
       console.log(` - total: ${entityList.length}`);
       console.log(` - type: ${entityListByType.length}`);
       console.log(` - component: ${entityListByComponents.length}`);
-    }, 5_000);
-  });
+    }, 5000);
+  }
 
-  Engine.onDestroy(() => {
+  const onDestroy = () => {
     clearInterval(interval);
     console.log("bye!");
-  });
+  }
 
-  const onAdd = (entityId: number) => {
+  const onAdd = (id: number) => {
     const entity = Engine.getEntity(id);
-    entity.updateComponent(Components.EXAMPLE_COMPONENT, { foo: "fii" });
-  };
+    entity.updateComponent?.(IComponents.EXAMPLE_COMPONENT, { foo: "fii" });
+  }
 
-  const onUpdate = (entityId: number, component: string) => {
+  const onUpdate = (id: number, component: IComponents) => {
     const entity = Engine.getEntity(id);
 
-    if (component !== Components.EXAMPLE_COMPONENT) return;
+    if (component !== IComponents.EXAMPLE_COMPONENT) return;
 
-    const { foo } = entity.getComponent(Components.EXAMPLE_COMPONENT);
-    if (foo === "fii" && !entity.hasComponent("FAKE_COMPONENT")) {
-      entity.removeComponent(Components.EXAMPLE_COMPONENT);
+    const { foo } = entity.getComponent?.(IComponents.EXAMPLE_COMPONENT);
+    if (foo === "fii" && !entity.hasComponent?.(IComponents.OTHER_COMPONENT)) {
+      entity.removeComponent?.(IComponents.EXAMPLE_COMPONENT);
     }
-  };
+  }
 
   const onRemove = (entityId: number) => {
     Engine.removeEntity(entityId);
   };
 
   return {
-    components: [
-      Components.EXAMPLE_COMPONENT,
-    ],
+    id: Engine.getUID(),
+    components: [IComponents.EXAMPLE_COMPONENT],
+    onLoad,
+    onDestroy,
     onAdd,
     onUpdate,
     onRemove,
-  };
-};
+  }
+}
 
 Engine.setSystems(exampleSystem);
-Engine.load();
+Engine.load()
 ```

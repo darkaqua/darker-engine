@@ -1,15 +1,15 @@
 /**
  * Engine
  */
-export interface EngineType {
+export interface EngineType<E,C extends string|number|symbol> {
 	setSystems: (...systems: SystemFunction[]) => void;
 
-	getEntityList: () => EntityType[];
-	getEntityListByType: (type: number) => EntityType[];
-	getEntityListByComponents: (...componentList: number[]) => EntityType[];
+	getEntityList: () => EntityType<E,C>[];
+	getEntityListByType: (type: number) => EntityType<E,C>[];
+	getEntityListByComponents: (...componentList: number[]) => EntityType<E,C>[];
 
-	getEntity: (id: number) => EntityType;
-	addEntity: (...entities: EntityType[]) => EntityType[];
+	getEntity: (id: E) => EntityType<E, C>;
+	addEntity: (...entities: EntityType<E,C>[]) => EntityType<E,C>[];
 	removeEntity: (...idList: number[]) => void;
 
 	getSystem: (name: number) => SystemType | undefined;
@@ -22,7 +22,7 @@ export interface EngineType {
 	getUID: () => number;
 }
 
-export type EngineFunction = () => EngineType;
+export type EngineFunction<E,C> = () => EngineType<E,C>;
 
 /**
  * System
@@ -43,20 +43,20 @@ export type SystemFunction = () => SystemType;
 /**
  * Entity
  */
-export interface EntityType {
+export interface EntityType<E, C extends string | number | symbol> {
 	//Only initial declaration
 	readonly id: number;
-	readonly type: number;
-	readonly data: Record<number, any>;
-	readonly components: number[];
+	readonly type: E;
+	readonly data: {[key in C]?: unknown};
+	readonly components: C[];
 
-	getData?: () => Record<number, any>;
-	getComponent?: <ComponentType>(
-		component: number,
+	getData?: () => {[key in C]?: unknown}
+	getComponent?: <ComponentType>( // TODO: ver si es necesario, o si se puede hacer sin pasar el tipo al ya ir tipado de arriba
+		component: C,
 		deepClone?: boolean,
 	) => ComponentType;
-	getComponents?: () => number[];
-	hasComponent?: (component: number) => boolean;
+	getComponents?: () => C[];
+	hasComponent?: (component: C) => boolean;
 	updateComponent?: UpdateComponentFunctionType;
 	removeComponent?: RemoveComponentFunctionType;
 }
