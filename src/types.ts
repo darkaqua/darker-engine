@@ -31,7 +31,7 @@ export interface SystemType {
   id: string;
   components: unknown[];
   onAdd?: (id: number) => void;
-  onUpdate?: (id: number, component?: string) => void;
+  onUpdate?: (id: number, component?: unknown) => void;
   onRemove?: (id: number) => void;
 
   onLoad?: () => void;
