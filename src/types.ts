@@ -29,7 +29,7 @@ export type EngineFunction = () => EngineType;
  */
 export interface SystemType {
   id: string;
-  components: string[];
+  components: unknown[];
   onAdd?: (id: number) => void;
   onUpdate?: (id: number, component?: string) => void;
   onRemove?: (id: number) => void;
