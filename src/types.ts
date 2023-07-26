@@ -65,4 +65,4 @@ export type UpdateComponentFunctionType = <ComponentType>(
   component: unknown,
   data: ComponentType,
 ) => void;
-export type RemoveComponentFunctionType = (component: string) => void;
+export type RemoveComponentFunctionType = (component: unknown) => void;
