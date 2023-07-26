@@ -197,7 +197,7 @@ export const engine: EngineFunction = () => {
         return currentEntityList;
       },
       Array<EntityType>(),
-    ).filter((e) => e !== undefined);
+    ).filter(Boolean);
   };
 
   const getEntity = (entityId: number) => entityList[entityId];
