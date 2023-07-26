@@ -50,17 +50,15 @@ export interface EntityType {
   readonly data: Record<unknown, Object>;
   readonly components: unknown[];
 
-  getData?: () => Record<string, Object>;
+  getData?: () => Record<unknown, Object>;
   getComponent?: <ComponentType>(
-    component: string,
+    component: unknown,
     deepClone?: boolean,
   ) => ComponentType;
-  getComponents?: () => string[];
-  hasComponent?: (component: string) => boolean;
+  getComponents?: () => unknown[];
+  hasComponent?: (component: unknown) => boolean;
   updateComponent?: UpdateComponentFunctionType;
   removeComponent?: RemoveComponentFunctionType;
-  // shortcuts
-  actions?: Record<string, <T>(data?: T) => unknown>;
 }
 
 export type UpdateComponentFunctionType = <ComponentType>(
