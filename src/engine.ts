@@ -159,7 +159,7 @@ export const engine: EngineFunction = () => {
     return entityData && entityData[component]
       ? (
         deepClone
-          ? JSON.parse(JSON.stringify(entityData[component]))
+          ? structuredClone(entityData[component])
           : { ...entityData[component] }
       )
       : {};
