@@ -216,15 +216,6 @@ export const engine: EngineFunction = () => {
       entity.updateComponent = (component, data) =>
         _entity_updateComponent(entity.id, component, data);
 
-      //shortcuts
-      entity.actions = {};
-      Object.keys(entity.shortcuts || {})
-        .forEach((key) => {
-          if (entity?.actions?.[key]) {
-            entity.actions[key] = (data) =>
-              entity?.shortcuts?.[key](entity, data);
-          }
-        });
 
       if (!typeEntityMap[entity.type]) {
         typeEntityMap[entity.type] = [];
