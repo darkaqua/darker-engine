@@ -6,143 +6,174 @@
 
 # Darker-Engine
 
-Lightweight functional library implementation of the [Entity-Component-System](https://en.wikipedia.org/wiki/Entity_component_system) pattern with typescript.
+Lightweight functional library implementation of the
+[Entity-Component-System](https://en.wikipedia.org/wiki/Entity_component_system)
+pattern with typescript.
+
+## Installation
+
+### Deno
+
+Import the package with deno:
+
+```ts
+import { engine as darkerEngine } from "https://deno.land/_TODO_/mod.ts";
+```
+
+### npm
+
+Install the package with npm:
+
+```bash
+npm install darker-engine
+```
 
 ### Code Example
 
 #### Declaration
+
 ```ts
-import {game as darkerGame} from "darker-engine";
+import { engine as darkerEngine } from "darker-engine";
 
-export const Game = darkerGame();
+export const Engine = darkerEngine();
 
-Game.setSystems(...[]);
+Engine.setSystems(...[]);
 
-Game.load();
+Engine.load();
 ```
+
 #### Enums
+
 ```ts
 enum EntityType {
-    EXAMPLE
+  EXAMPLE,
 }
 
 enum Components {
-    EXAMPLE_COMPONENT = 'EXAMPLE_COMPONENT'
+  EXAMPLE_COMPONENT = "EXAMPLE_COMPONENT",
 }
 ```
+
 #### Entity
+
 ```ts
-import {EntityType} from "darker-engine";
+import { EntityType } from "darker-engine";
 
 const exampleEntity = (): EntityType => ({
-    id: Game.getUID(),
-    type: EntityType.EXAMPLE,
-    data: {},
-    components: []
+  id: Engine.getUID(),
+  type: EntityType.EXAMPLE,
+  data: {},
+  components: [],
 });
 ```
+
 #### Systems
+
 ```ts
-import {SystemFunction} from "darker-engine";
- 
+import { SystemFunction } from "darker-engine";
+
 const exampleSystem: SystemFunction = () => {
-    
-    const onAdd = (entityId: number) => {}
-    const onUpdate = (entityId: number, component: string) => {}
-    const onRemove = (entityId: number) => {}
-    
-    return {
-        components: [],
-        onAdd,
-        onUpdate,
-        onRemove
-    }
-}
+  const onAdd = (entityId: number) => {};
+  const onUpdate = (entityId: number, component: string) => {};
+  const onRemove = (entityId: number) => {};
+
+  return {
+    components: [],
+    onAdd,
+    onUpdate,
+    onRemove,
+  };
+};
 ```
 
 #### Full code
-```ts
-import {game as darkerGame, SystemFunction, EntityType} from "darker-engine";
 
-export const Game = darkerGame();
+```ts
+import {
+  engine as darkerEngine,
+  EntityType,
+  SystemFunction,
+} from "darker-engine";
+
+export const Engine = darkerEngine();
 
 enum EntityType {
-    EXAMPLE
+  EXAMPLE,
 }
 
 enum Components {
-    EXAMPLE_COMPONENT = 'EXAMPLE_COMPONENT'
+  EXAMPLE_COMPONENT = "EXAMPLE_COMPONENT",
 }
 
 const exampleEntity = (): EntityType => ({
-    id: Game.getUID(),
-    type: EntityType.EXAMPLE,
-    data: {
-        [Components.EXAMPLE_COMPONENT]: {
-            foo: 'faa'
-        }
+  id: Engine.getUID(),
+  type: EntityType.EXAMPLE,
+  data: {
+    [Components.EXAMPLE_COMPONENT]: {
+      foo: "faa",
     },
-    components: [
-        Components.EXAMPLE_COMPONENT
-    ]
+  },
+  components: [
+    Components.EXAMPLE_COMPONENT,
+  ],
 });
 
 const exampleSystem: SystemFunction = () => {
-    
-    let interval;
-    
-    Game.onLoad(() => {
-        console.log('welcome!')
-        Game.addEntity(exampleEntity());
-    
-        interval = setInterval(() => {
-            const entityList = Game.getEntityList();
-            const entityListByType = Game.getEntityListByType(EntityType.EXAMPLE);
-            const entityListByComponents = Game.getEntityListByComponents(Components.EXAMPLE_COMPONENT);
-            
-            console.log(`Entities`);
-            console.log(` - total: ${entityList.length}`);
-            console.log(` - type: ${entityListByType.length}`);
-            console.log(` - component: ${entityListByComponents.length}`);
-        }, 5_000)
-    });
-    
-    Game.onDestroy(() => {
-        clearInterval(interval);
-        console.log('bye!')
-    });
-    
-    const onAdd = (entityId: number) => {
-        const entity = Game.getEntity(id);
-        entity.updateComponent(Components.EXAMPLE_COMPONENT, { foo: 'fii' });
-    }
-    
-    const onUpdate = (entityId: number, component: string) => {
-        const entity = Game.getEntity(id);
-        
-        if(component !== Components.EXAMPLE_COMPONENT) return;
-        
-        const { foo } = entity.getComponent(Components.EXAMPLE_COMPONENT);
-        if(foo === 'fii' && !entity.hasComponent('FAKE_COMPONENT'))
-            entity.removeComponent(Components.EXAMPLE_COMPONENT);
-    }
-    
-    const onRemove = (entityId: number) => {
-        Game.removeEntity(entityId);
-    }
-    
-    return {
-        components: [
-            Components.EXAMPLE_COMPONENT
-        ],
-        onAdd,
-        onUpdate,
-        onRemove
-    }
-}
+  let interval;
 
+  Engine.onLoad(() => {
+    console.log("welcome!");
+    Engine.addEntity(exampleEntity());
 
-Game.setSystems(exampleSystem);
-Game.load();
+    interval = setInterval(() => {
+      const entityList = Engine.getEntityList();
+      const entityListByType = Engine.getEntityListByType(EntityType.EXAMPLE);
+      const entityListByComponents = Engine.getEntityListByComponents(
+        Components.EXAMPLE_COMPONENT,
+      );
 
+      console.log(`Entities`);
+      console.log(` - total: ${entityList.length}`);
+      console.log(` - type: ${entityListByType.length}`);
+      console.log(` - component: ${entityListByComponents.length}`);
+    }, 5_000);
+  });
+
+  Engine.onDestroy(() => {
+    clearInterval(interval);
+    console.log("bye!");
+  });
+
+  const onAdd = (entityId: number) => {
+    const entity = Engine.getEntity(id);
+    entity.updateComponent(Components.EXAMPLE_COMPONENT, { foo: "fii" });
+  };
+
+  const onUpdate = (entityId: number, component: string) => {
+    const entity = Engine.getEntity(id);
+
+    if (component !== Components.EXAMPLE_COMPONENT) return;
+
+    const { foo } = entity.getComponent(Components.EXAMPLE_COMPONENT);
+    if (foo === "fii" && !entity.hasComponent("FAKE_COMPONENT")) {
+      entity.removeComponent(Components.EXAMPLE_COMPONENT);
+    }
+  };
+
+  const onRemove = (entityId: number) => {
+    Engine.removeEntity(entityId);
+  };
+
+  return {
+    components: [
+      Components.EXAMPLE_COMPONENT,
+    ],
+    onAdd,
+    onUpdate,
+    onRemove,
+  };
+};
+
+Engine.setSystems(exampleSystem);
+Engine.load();
 ```

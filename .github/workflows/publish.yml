@@ -17,25 +17,33 @@ jobs:
     name: 'Build'
     needs: tests
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        deno-version: [ 1.35.2 ]
+
     steps:
       - uses: actions/checkout@v3
-      - name: Install modules
-        run: yarn
-      - name: Add version to package.json
-        uses: jaywcjlove/github-action-package@main
+      - name: Use Deno Version ${{ matrix.deno-version }}
+        uses: denoland/setup-deno@v1
         with:
-          data: |
-            {
-              "version": "${{ github.ref_name }}"
-            }
-      - name: Build
-        run: yarn run build
+          deno-version: ${{ matrix.deno-version }}
+
+      - name: Convert Deno Module to NPM
+        run: deno task build:npm ${{ github.ref_name }}
+
+      - name: Install modules
+        run: |
+          cd npm
+          yarn
+
       # Setup .npmrc file to publish to npm
       - uses: actions/setup-node@v3
         with:
           node-version: '16.x'
           registry-url: 'https://registry.npmjs.org'
       - name: Publish
-        run: npm publish
+        run: |
+          cd npm
+          npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
