@@ -47,12 +47,8 @@ export interface EntityType {
   //Only initial declaration
   readonly id: number;
   readonly type: number;
-  readonly data: Record<string, Object>;
-  readonly components: string[];
-  readonly shortcuts?: Record<
-    string,
-    <T>(entity: EntityType, data?: T) => unknown
-  >;
+  readonly data: Record<unknown, Object>;
+  readonly components: unknown[];
 
   getData?: () => Record<string, Object>;
   getComponent?: <ComponentType>(
