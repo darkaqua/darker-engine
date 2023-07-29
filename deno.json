@@ -2,7 +2,7 @@
   "tasks": {
     "fmt:check": "deno fmt --check",
     "build": "deno run --reload mod.ts",
-    "build:npm": "deno run --allow-env --allow-read --allow-write --allow-run scripts/npm.ts",
+    "build:npm": "deno run --allow-env --allow-read --allow-write --allow-run --allow-net scripts/npm.ts",
     "test": "deno test --allow-none --coverage=coverage",
     "coverage": "deno coverage ./coverage --lcov > coverage.lcov",
     "test:coverage": "deno task test && deno task coverage"
