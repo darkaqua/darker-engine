@@ -17,7 +17,7 @@ pattern with typescript.
 Import the package with deno:
 
 ```ts
-import { engine as darkerEngine } from "https://deno.land/x/darker_engine@v5.0.0/mod.ts";
+import { engine as darkerEngine } from "https://deno.land/x/darker_engine/mod.ts";
 ```
 
 ### npm
