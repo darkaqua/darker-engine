@@ -1,9 +1,9 @@
-import { EngineFunction, EntityType, SystemFunction, SystemType } from './types.ts';
+import {EngineType, EntityType, SystemFunction, SystemType} from './types.ts';
 import { uid } from './uid.ts';
 
-export const engine: EngineFunction = <E,C extends string|number|symbol>() => {
+export const engine = <C,D>(): EngineType<C,D> => {
 	let systems: SystemType[] = [];
-	let entityList: EntityType<E,C>[] = [];
+	let entityList: EntityType<C,D>[] = [];
 	let typeEntityMap: number[][] = [];
 	let entityComponentMap: number[][] = [];
 	// Contains which components/data has every entity
@@ -25,7 +25,7 @@ export const engine: EngineFunction = <E,C extends string|number|symbol>() => {
 		});
 	};
 
-	const _entity_removeComponent = (entityId: E, component: number) => {
+	const _entity_removeComponent = (entityId: number, component: number) => {
 		const entity = getEntity(entityId);
 		entityComponentMap[entityId] = entityComponentMap[entityId].filter(
 			(_component) => _component !== component,
@@ -134,12 +134,13 @@ export const engine: EngineFunction = <E,C extends string|number|symbol>() => {
 	// TODO: maintain original order, not this shit
 	const _entity_getComponents = (entityId: number) => entityComponentMap[entityId];
 
-	const _entity_getComponent = (
+	const _entity_getComponent = <T extends keyof D>(
 		entityId: number,
-		component: number,
+		component: T,
 		deepClone = false,
-	) => {
+	): D[T] | undefined => {
 		const entityData = entityDataMap[entityId];
+
 		return entityData && entityData[component]
 			? (
 				deepClone ? structuredClone(entityData[component]) : { ...entityData[component] }
@@ -152,14 +153,14 @@ export const engine: EngineFunction = <E,C extends string|number|symbol>() => {
 
 	const _entity_getData = (entityId: number) => structuredClone(entityDataMap[entityId]);
 
-	const getEntityList = (): EntityType<E,C>[] => Object.values(entityList) || [];
+	const getEntityList = (): EntityType<C,D>[] => Object.values(entityList) || [];
 
-	const getEntityListByType = (type: number): EntityType<E,C>[] =>
+	const getEntityListByType = (type: number): EntityType<C,D>[] =>
 		typeEntityMap[type]?.map((entityId) => entityList[entityId]) || [];
 
 	const getEntityListByComponents = (
 		...componentList: number[]
-	): EntityType<E,C>[] => {
+	): EntityType<C,D>[] => {
 		const entityIdList = entityComponentMap.reduce(
 			(acc: number[], element: number[], index: number) => {
 				if (element !== null) {
@@ -185,13 +186,13 @@ export const engine: EngineFunction = <E,C extends string|number|symbol>() => {
 
 				return currentEntityList;
 			},
-			Array<EntityType<E,C>>(),
+			Array<EntityType<C,D>>(),
 		).filter(Boolean);
 	};
 
-	const getEntity = (entityId: E) => entityList[entityId];
+	const getEntity = (entityId: number) => entityList[entityId];
 
-	const addEntity = (...entities: EntityType<E,C>[]): EntityType<E,C>[] => {
+	const addEntity = (...entities: EntityType<C,D>[]): EntityType<C,D>[] => {
 		const date = Date.now();
 		entities.forEach((entity) => {
 			entity.getData = () => _entity_getData(entity.id);

@@ -1,15 +1,15 @@
 /**
  * Engine
  */
-export interface EngineType<E,C extends string|number|symbol> {
+export interface EngineType<C,D> {
 	setSystems: (...systems: SystemFunction[]) => void;
 
-	getEntityList: () => EntityType<E,C>[];
-	getEntityListByType: (type: number) => EntityType<E,C>[];
-	getEntityListByComponents: (...componentList: number[]) => EntityType<E,C>[];
+	getEntityList: () => EntityType<C,D>[];
+	getEntityListByType: (type: number) => EntityType<C,D>[];
+	getEntityListByComponents: (...componentList: number[]) => EntityType<C,D>[];
 
-	getEntity: (id: E) => EntityType<E, C>;
-	addEntity: (...entities: EntityType<E,C>[]) => EntityType<E,C>[];
+	getEntity: (id: number) => EntityType<C,D>;
+	addEntity: (...entities: EntityType<C,D>[]) => EntityType<C,D>[];
 	removeEntity: (...idList: number[]) => void;
 
 	getSystem: (name: number) => SystemType | undefined;
@@ -21,8 +21,6 @@ export interface EngineType<E,C extends string|number|symbol> {
 
 	getUID: () => number;
 }
-
-export type EngineFunction<E,C> = () => EngineType<E,C>;
 
 /**
  * System
@@ -43,20 +41,20 @@ export type SystemFunction = () => SystemType;
 /**
  * Entity
  */
-export interface EntityType<E, C extends string | number | symbol> {
+export interface EntityType<C,D> {
 	//Only initial declaration
 	readonly id: number;
-	readonly type: E;
-	readonly data: {[key in C]?: unknown};
-	readonly components: C[];
+	readonly type: number;
+	readonly data: Record<number, any>;
+	readonly components: number[];
 
-	getData?: () => {[key in C]?: unknown}
-	getComponent?: <ComponentType>( // TODO: ver si es necesario, o si se puede hacer sin pasar el tipo al ya ir tipado de arriba
-		component: C,
+	getData?: () => Record<number, any>;
+	getComponent?: <T extends keyof D>(
+		component: T,
 		deepClone?: boolean,
-	) => ComponentType;
-	getComponents?: () => C[];
-	hasComponent?: (component: C) => boolean;
+	) => D[T] | undefined;
+	getComponents?: () => number[];
+	hasComponent?: (component: number) => boolean;
 	updateComponent?: UpdateComponentFunctionType;
 	removeComponent?: RemoveComponentFunctionType;
 }
