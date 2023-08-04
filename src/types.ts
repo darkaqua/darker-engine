@@ -1,18 +1,18 @@
 /**
  * Engine
  */
-export interface EngineType {
-	setSystems: (...systems: SystemFunction[]) => void;
+export interface EngineType<I, C extends string | number, D> {
+	setSystems: (...systems: SystemFunction<C>[]) => void;
 
-	getEntityList: () => EntityType[];
-	getEntityListByType: (type: number) => EntityType[];
-	getEntityListByComponents: (...componentList: number[]) => EntityType[];
+	getEntityList: () => EntityType<I, C, D>[];
+	getEntityListByType: (type: I) => EntityType<I, C, D>[];
+	getEntityListByComponents: (...componentList: C[]) => EntityType<I, C, D>[];
 
-	getEntity: (id: number) => EntityType;
-	addEntity: (...entities: EntityType[]) => EntityType[];
+	getEntity: (id: number) => EntityType<I, C, D>;
+	addEntity: (...entities: EntityType<I, C, D>[]) => EntityType<I, C, D>[];
 	removeEntity: (...idList: number[]) => void;
 
-	getSystem: (name: number) => SystemType | undefined;
+	getSystem: (name: number) => SystemType<C> | undefined;
 
 	clear: () => void;
 
@@ -22,47 +22,48 @@ export interface EngineType {
 	getUID: () => number;
 }
 
-export type EngineFunction = () => EngineType;
-
 /**
  * System
  */
-export interface SystemType {
+export interface SystemType<C> {
 	id: number;
-	components: number[];
+	components: C[];
 	onAdd?: (id: number) => void;
-	onUpdate?: (id: number, component?: number) => void;
+	onUpdate?: (id: number, component?: C) => void;
 	onRemove?: (id: number) => void;
 
 	onLoad?: () => void;
 	onDestroy?: () => void;
 }
 
-export type SystemFunction = () => SystemType;
+export type SystemFunction<C> = () => SystemType<C>;
 
 /**
  * Entity
  */
-export interface EntityType {
+
+export interface EntityType<I, C extends string | number, D> {
 	//Only initial declaration
 	readonly id: number;
-	readonly type: number;
-	readonly data: Record<number, any>;
-	readonly components: number[];
+	readonly type: I;
+	readonly data: Partial<D>;
+	readonly components: C[];
 
 	getData?: () => Record<number, any>;
-	getComponent?: <ComponentType>(
-		component: number,
+	getComponent?: <T extends keyof D>(
+		component: T,
 		deepClone?: boolean,
-	) => ComponentType;
-	getComponents?: () => number[];
+	) => D[T] | undefined;
+	getComponents?: () => C[];
 	hasComponent?: (component: number) => boolean;
-	updateComponent?: UpdateComponentFunctionType;
-	removeComponent?: RemoveComponentFunctionType;
+	updateComponent?: UpdateComponentFunctionType<C>;
+	removeComponent?: RemoveComponentFunctionType<C>;
 }
 
-export type UpdateComponentFunctionType = <ComponentType>(
-	component: number,
+export type UpdateComponentFunctionType<C> = <ComponentType>(
+	component: C,
 	data: ComponentType,
 ) => void;
-export type RemoveComponentFunctionType = (component: number) => void;
+export type RemoveComponentFunctionType<C> = (component: C) => void;
+
+export type DarkerMap<T extends string | number, S> = { [key in T]: S };

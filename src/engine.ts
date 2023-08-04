@@ -1,19 +1,23 @@
-import { EngineFunction, EntityType, SystemFunction, SystemType } from './types.ts';
+import { DarkerMap, EngineType, EntityType, SystemFunction, SystemType } from './types.ts';
 import { uid } from './uid.ts';
 
-export const engine: EngineFunction = () => {
-	let systems: SystemType[] = [];
-	let entityList: EntityType[] = [];
-	let typeEntityMap: number[][] = [];
-	let entityComponentMap: number[][] = [];
+export const engine = <I extends string | number, C extends string | number, D>(): EngineType<
+	I,
+	C,
+	D
+> => {
+	let systems: SystemType<C>[] = [];
+	let entityList: EntityType<I, C, D>[] = [];
+	let typeEntityMap: DarkerMap<I, number[]> = {} as DarkerMap<I, number[]>;
+	let entityComponentMap: DarkerMap<number, C[]> = {};
 	// Contains which components/data has every entity
-	let entityDataMap: any[] = [];
+	let entityDataMap: DarkerMap<number, any> = [];
 	// Contains which entities has every system
 	let systemEntitiesMap: number[][] = [];
 
 	const { getUID } = uid();
 
-	const setSystems = (..._systems: SystemFunction[]) => {
+	const setSystems = (..._systems: SystemFunction<C>[]) => {
 		systems = [];
 		systemEntitiesMap = [];
 
@@ -25,7 +29,7 @@ export const engine: EngineFunction = () => {
 		});
 	};
 
-	const _entity_removeComponent = (entityId: number, component: number) => {
+	const _entity_removeComponent = (entityId: number, component: C) => {
 		const entity = getEntity(entityId);
 		entityComponentMap[entityId] = entityComponentMap[entityId].filter(
 			(_component) => _component !== component,
@@ -59,7 +63,7 @@ export const engine: EngineFunction = () => {
 
 	const _entity_updateComponent = (
 		entityId: number,
-		component: number,
+		component: C,
 		data = {},
 	) => {
 		const entity = getEntity(entityId);
@@ -96,7 +100,7 @@ export const engine: EngineFunction = () => {
 
 	const _entity_addComponent = (
 		entityId: number,
-		component: number,
+		component: C,
 		data = {},
 	) => {
 		const entity = getEntity(entityId);
@@ -134,12 +138,13 @@ export const engine: EngineFunction = () => {
 	// TODO: maintain original order, not this shit
 	const _entity_getComponents = (entityId: number) => entityComponentMap[entityId];
 
-	const _entity_getComponent = (
+	const _entity_getComponent = <T extends keyof D>(
 		entityId: number,
-		component: number,
+		component: T,
 		deepClone = false,
-	) => {
+	): D[T] | undefined => {
 		const entityData = entityDataMap[entityId];
+
 		return entityData && entityData[component]
 			? (
 				deepClone ? structuredClone(entityData[component]) : { ...entityData[component] }
@@ -152,46 +157,33 @@ export const engine: EngineFunction = () => {
 
 	const _entity_getData = (entityId: number) => structuredClone(entityDataMap[entityId]);
 
-	const getEntityList = (): EntityType[] => Object.values(entityList) || [];
+	const getEntityList = (): EntityType<I, C, D>[] => Object.values(entityList) || [];
 
-	const getEntityListByType = (type: number): EntityType[] =>
+	const getEntityListByType = (type: I): EntityType<I, C, D>[] =>
 		typeEntityMap[type]?.map((entityId) => entityList[entityId]) || [];
 
 	const getEntityListByComponents = (
-		...componentList: number[]
-	): EntityType[] => {
-		const entityIdList = entityComponentMap.reduce(
-			(acc: number[], element: number[], index: number) => {
-				if (element !== null) {
-					acc.push(index);
-				}
-				return acc;
-			},
-			[],
-		);
+		...componentList: C[]
+	): EntityType<I, C, D>[] => {
+		return entityList.reduce((list, entity) => {
+			const entityComponents = entityComponentMap[entity.id];
+			if (
+				componentList.length === 0 ||
+				componentList.every((component) => entityComponents.includes(component))
+			) {
+				return [
+					...list,
+					entity,
+				];
+			}
 
-		return entityIdList.reduce(
-			(currentEntityList, entityId, index) => {
-				const entityComponents = entityComponentMap[entityId];
-				if (
-					componentList.length === 0 ||
-					componentList.every((component) => entityComponents.includes(component))
-				) {
-					return [
-						...currentEntityList,
-						entityList[entityIdList[index]],
-					];
-				}
-
-				return currentEntityList;
-			},
-			Array<EntityType>(),
-		).filter(Boolean);
+			return list;
+		}, Array<EntityType<I, C, D>>()).filter(Boolean);
 	};
 
 	const getEntity = (entityId: number) => entityList[entityId];
 
-	const addEntity = (...entities: EntityType[]): EntityType[] => {
+	const addEntity = (...entities: EntityType<I, C, D>[]): EntityType<I, C, D>[] => {
 		const date = Date.now();
 		entities.forEach((entity) => {
 			entity.getData = () => _entity_getData(entity.id);
@@ -311,7 +303,7 @@ export const engine: EngineFunction = () => {
 	const clear = () => {
 		systems = [];
 		entityList = [];
-		typeEntityMap = [];
+		typeEntityMap = {} as DarkerMap<I, number[]>;
 		entityComponentMap = [];
 		entityDataMap = [];
 		systemEntitiesMap = [];
