@@ -22,7 +22,7 @@ export const engine = <I extends string | number, C extends string | number, D>(
 		systemEntitiesMap = [];
 
 		_systems.forEach((system) => {
-			const _system = system();
+			const _system = system() as SystemType<C>;
 			_system.id = _system.id ?? getUID();
 			systemEntitiesMap[_system.id] = [];
 			systems[_system.id] = _system;
@@ -64,7 +64,7 @@ export const engine = <I extends string | number, C extends string | number, D>(
 	const _entity_updateComponent = (
 		entityId: number,
 		component: C,
-		data = {},
+		data: any ,
 	) => {
 		const entity = getEntity(entityId);
 		if (!entityComponentMap[entityId]?.includes(component)) {
@@ -193,7 +193,7 @@ export const engine = <I extends string | number, C extends string | number, D>(
 			entity.hasComponent = (component) => _entity_hasComponent(entity.id, component);
 			entity.removeComponent = (component) => _entity_removeComponent(entity.id, component);
 			entity.updateComponent = (component, data) =>
-				_entity_updateComponent(entity.id, component, data as any);
+				_entity_updateComponent(entity.id, component as unknown as C, data);
 
 			if (!typeEntityMap[entity.type]) {
 				typeEntityMap[entity.type] = [];
@@ -202,9 +202,9 @@ export const engine = <I extends string | number, C extends string | number, D>(
 
 			entityComponentMap[entity.id] = entity.components;
 
-			entityDataMap[entity.id] = entity?.getComponents?.().reduce((a, b) => ({
-				...a,
-				[b]: a[b] || {},
+			entityDataMap[entity.id] = entity?.getComponents?.().reduce((acc, b) => ({
+				...acc,
+				[b]: (acc as any)[b] || {},
 			}), entity.data) ?? {};
 			entityList[entity.id] = entity;
 		});

@@ -36,7 +36,7 @@ export interface SystemType<C> {
 	onDestroy?: () => void;
 }
 
-export type SystemFunction<C> = () => SystemType<C>;
+export type SystemFunction<C> = () => Omit<SystemType<C>, 'id'>;
 
 /**
  * Entity
@@ -56,7 +56,7 @@ export interface EntityType<I, C extends string | number, D> {
 	) => D[T] | undefined;
 	getComponents?: () => C[];
 	hasComponent?: (component: number) => boolean;
-	updateComponent?: UpdateComponentFunctionType<C>;
+	updateComponent?: <T extends keyof D>(component: T, data?: D[T]) => void;
 	removeComponent?: RemoveComponentFunctionType<C>;
 }
 

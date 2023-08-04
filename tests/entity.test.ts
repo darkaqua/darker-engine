@@ -2,20 +2,20 @@ import { assertEquals, assertNotEquals } from 'https://deno.land/std@0.195.0/tes
 import { spy } from 'https://deno.land/std@0.195.0/testing/mock.ts';
 
 import { engine, SystemFunction } from '../src/index.ts';
-import { Component, getEntity, System } from './utils.ts';
+import { Component, Entity, getEntity, System } from './utils.ts';
 
 Deno.test('Entity', async (test) => {
-	const Engine = engine();
+	const Engine = engine<Entity, Component, any>();
 
 	const onAddSystemAMock = spy(() => {});
 	const onAddSystemBMock = spy(() => {});
 
-	const systemA: SystemFunction = () => ({
+	const systemA: SystemFunction<Component> = () => ({
 		id: System.SYSTEM_A,
 		components: [Component.COMPONENT_A],
 		onAdd: onAddSystemAMock,
 	});
-	const systemB: SystemFunction = () => ({
+	const systemB: SystemFunction<Component> = () => ({
 		id: System.SYSTEM_B,
 		components: [Component.COMPONENT_A, Component.COMPONENT_B],
 		onAdd: onAddSystemBMock,

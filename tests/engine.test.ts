@@ -5,10 +5,10 @@ import {
 } from 'https://deno.land/std@0.195.0/testing/asserts.ts';
 
 import { engine, SystemFunction } from '../src/index.ts';
-import { Component, getEntity, System } from './utils.ts';
+import { Component, Entity, getEntity, System } from './utils.ts';
 
 Deno.test('Engine', async (test) => {
-	const Engine = engine();
+	const Engine = engine<Entity, Component, any>();
 
 	await test.step('expect Engine.getUID to be 1', () => {
 		assertEquals(Engine.getUID(), 1);
@@ -23,7 +23,7 @@ Deno.test('Engine', async (test) => {
 	});
 
 	await test.step('expect Engine.setSystems to add a system', () => {
-		const system: SystemFunction = () => ({
+		const system: SystemFunction<Component> = () => ({
 			id: System.SYSTEM_B,
 			components: [],
 		});
@@ -39,33 +39,33 @@ Deno.test('Engine', async (test) => {
 
 	await test.step('expect Engine.getEntityList to have 6 element', () => {
 		Engine.addEntity(
-			getEntity(Engine.getUID(), 0, {}, []),
-			getEntity(Engine.getUID(), 0, {}, [Component.COMPONENT_A]),
-			getEntity(Engine.getUID(), 1, {}, []),
-			getEntity(Engine.getUID(), 1, {}, [Component.COMPONENT_A]),
-			getEntity(Engine.getUID(), 2, {}, [
+			getEntity(Engine.getUID(), Entity.EXAMPLE_A, {}, []),
+			getEntity(Engine.getUID(), Entity.EXAMPLE_A, {}, [Component.COMPONENT_A]),
+			getEntity(Engine.getUID(), Entity.EXAMPLE_B, {}, []),
+			getEntity(Engine.getUID(), Entity.EXAMPLE_B, {}, [Component.COMPONENT_A]),
+			getEntity(Engine.getUID(), Entity.EXAMPLE_C, {}, [
 				Component.COMPONENT_A,
 				Component.COMPONENT_B,
 			]),
-			getEntity(Engine.getUID(), 3, {}, [Component.COMPONENT_B]),
+			getEntity(Engine.getUID(), Entity.EXAMPLE_D, {}, [Component.COMPONENT_B]),
 		);
 		assert(Engine.getEntityList().length === 6);
 	});
 
 	await test.step('expect Engine.getEntityListByType with type 0 to have 2 entity', () => {
-		assert(Engine.getEntityListByType(0).length === 2);
+		assert(Engine.getEntityListByType(Entity.EXAMPLE_A).length === 2);
 	});
 
 	await test.step('expect Engine.getEntityListByType with type 1 to have 2 entity', () => {
-		assert(Engine.getEntityListByType(1).length === 2);
+		assert(Engine.getEntityListByType(Entity.EXAMPLE_B).length === 2);
 	});
 
 	await test.step('expect Engine.getEntityListByType with type 2 to have 1 entity', () => {
-		assert(Engine.getEntityListByType(2).length === 1);
+		assert(Engine.getEntityListByType(Entity.EXAMPLE_C).length === 1);
 	});
 
 	await test.step('expect Engine.getEntityListByType with type 3 to have 1 entity', () => {
-		assert(Engine.getEntityListByType(3).length === 1);
+		assert(Engine.getEntityListByType(Entity.EXAMPLE_D).length === 1);
 	});
 
 	await test.step('expect Engine.getEntityListByComponents with no components to have 6 entity', () => {

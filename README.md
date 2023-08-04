@@ -35,7 +35,7 @@ npm install darker-engine
 ```ts
 import { engine as darkerEngine } from "darker-engine";
 
-export const Engine = darkerEngine();
+export const Engine = darkerEngine<IEntities, IComponents, ComponentData>();
 
 Engine.setSystems(...[]);
 
@@ -59,7 +59,7 @@ enum Components {
 ```ts
 import { EntityType } from "darker-engine";
 
-const exampleEntity = (): EntityType => ({
+const exampleEntity = (): EntityType<IEntities, IComponents, ComponentData> => ({
   id: Engine.getUID(),
   type: EntityType.EXAMPLE,
   data: {},
@@ -72,7 +72,7 @@ const exampleEntity = (): EntityType => ({
 ```ts
 import { SystemFunction } from "darker-engine";
 
-const exampleSystem: SystemFunction = () => {
+const exampleSystem: SystemFunction<IComponents> = () => {
   const onAdd = (entityId: number) => {};
   const onUpdate = (entityId: number, component: string) => {};
   const onRemove = (entityId: number) => {};
@@ -95,8 +95,6 @@ import {
   SystemFunction,
 } from "darker-engine";
 
-export const Engine = darkerEngine()
-
 enum IEntities {
   EXAMPLE_ENTITY,
 }
@@ -106,7 +104,18 @@ enum IComponents {
   OTHER_COMPONENT,
 }
 
-const exampleEntity = (): EntityType => ({
+type ComponentData = {
+  [IComponents.EXAMPLE_COMPONENT]: {
+    foo: string;
+  },
+  [IComponents.OTHER_COMPONENT]: {
+    bar: number;
+  };
+};
+
+export const Engine = darkerEngine<IEntities, IComponents, ComponentData>()
+
+const exampleEntity = (): EntityType<IEntities, IComponents, ComponentData> => ({
   id: Engine.getUID(),
   type: IEntities.EXAMPLE_ENTITY,
   data: {
@@ -117,7 +126,7 @@ const exampleEntity = (): EntityType => ({
   components: [IComponents.EXAMPLE_COMPONENT],
 })
 
-const exampleSystem: SystemFunction = () => {
+const exampleSystem: SystemFunction<IComponents> = () => {
   let interval: number
 
   const onLoad = () => {
