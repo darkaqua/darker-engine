@@ -72,10 +72,6 @@ export type SimpleEntityType<I, C extends string | number, D> = Omit<
 
 export type EntityTypeFunction<I, C extends string | number, D> = () => SimpleEntityType<I, C, D>;
 
-export type UpdateComponentFunctionType<C> = <ComponentType>(
-	component: C,
-	data: ComponentType,
-) => void;
 export type RemoveComponentFunctionType<C> = (component: C) => void;
 
 export type DarkerMap<T extends string | number, S> = { [key in T]: S };
