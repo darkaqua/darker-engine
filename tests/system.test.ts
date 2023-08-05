@@ -8,11 +8,11 @@ import {
 	spy,
 } from 'https://deno.land/std@0.195.0/testing/mock.ts';
 
-import { engine, SystemFunction } from '../src/index.ts';
-import { Component, Entity, getEntity, System } from './utils.ts';
+import { engine, EntityType, SystemFunction } from '../src/index.ts';
+import { Component, ComponentData, Entity, getEntity, System } from './utils.ts';
 
 Deno.test('System', async (test) => {
-	const Engine = engine<Entity, Component, any>();
+	const Engine = engine<Entity, Component, ComponentData>();
 
 	const onAddSystemAMock = spy(() => {});
 	const onAddSystemBMock = spy(() => {});
@@ -49,7 +49,11 @@ Deno.test('System', async (test) => {
 	});
 	Engine.setSystems(systemA, systemB);
 
-	const entityA = getEntity(Engine.getUID(), 0, {}, [Component.COMPONENT_A]);
+	const entityA = getEntity(Engine.getUID(), 0, {}, [Component.COMPONENT_A])() as EntityType<
+		Entity,
+		Component,
+		ComponentData
+	>;
 
 	await test.step('expect systems to exist', () => {
 		assertNotEquals(Engine.getSystem(System.SYSTEM_A), undefined);
@@ -69,12 +73,12 @@ Deno.test('System', async (test) => {
 	});
 
 	await test.step('onUpdate', async (t) => {
-		entityA?.removeComponent?.(Component.COMPONENT_B);
+		entityA.removeComponent(Component.COMPONENT_B);
 
 		await t.step(
 			'expect entity to be updated on a system A and not to be called on system B',
 			() => {
-				entityA?.updateComponent?.(Component.COMPONENT_A, {});
+				entityA.updateComponent(Component.COMPONENT_A, {});
 
 				assertSpyCallArgs(onUpdateSystemAMock, 0, 0, [
 					entityA.id,
@@ -87,14 +91,14 @@ Deno.test('System', async (test) => {
 		await t.step(
 			'expect add component on entity and be added on a system B',
 			() => {
-				entityA?.updateComponent?.(Component.COMPONENT_B, {});
+				entityA.updateComponent(Component.COMPONENT_B, {});
 
 				assertSpyCallArg(onAddSystemBMock, 0, 0, entityA.id);
 			},
 		);
 
 		await t.step('expect entity to be updated on system A and B', () => {
-			entityA?.updateComponent?.(Component.COMPONENT_A, {});
+			entityA.updateComponent(Component.COMPONENT_A, {});
 
 			assertSpyCallArgs(onUpdateSystemAMock, 0, 0, [
 				entityA.id,
@@ -107,7 +111,7 @@ Deno.test('System', async (test) => {
 		});
 
 		await t.step('expect entity to be updated only on system B', () => {
-			entityA?.updateComponent?.(Component.COMPONENT_B, {});
+			entityA.updateComponent(Component.COMPONENT_B, {});
 
 			// Good "ñapa" but works \o/
 			try {
@@ -131,7 +135,7 @@ Deno.test('System', async (test) => {
 		await t.step(
 			'expect remove entity component and be removed from system B',
 			() => {
-				entityA?.removeComponent?.(Component.COMPONENT_B);
+				entityA.removeComponent(Component.COMPONENT_B);
 
 				assertSpyCalls(onRemoveSystemAMock, 0);
 				assertSpyCallArg(onRemoveSystemBMock, 0, 0, entityA.id);
@@ -141,7 +145,7 @@ Deno.test('System', async (test) => {
 		await t.step(
 			'expect remove entity component and be removed from system A',
 			() => {
-				entityA?.removeComponent?.(Component.COMPONENT_A);
+				entityA.removeComponent(Component.COMPONENT_A);
 
 				assertSpyCallArg(onRemoveSystemAMock, 0, 0, entityA.id);
 			},

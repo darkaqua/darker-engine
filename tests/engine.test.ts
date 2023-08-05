@@ -5,10 +5,10 @@ import {
 } from 'https://deno.land/std@0.195.0/testing/asserts.ts';
 
 import { engine, SystemFunction } from '../src/index.ts';
-import { Component, Entity, getEntity, System } from './utils.ts';
+import { Component, ComponentData, Entity, getEntity, System } from './utils.ts';
 
 Deno.test('Engine', async (test) => {
-	const Engine = engine<Entity, Component, any>();
+	const Engine = engine<Entity, Component, ComponentData>();
 
 	await test.step('expect Engine.getUID to be 1', () => {
 		assertEquals(Engine.getUID(), 1);
@@ -39,15 +39,15 @@ Deno.test('Engine', async (test) => {
 
 	await test.step('expect Engine.getEntityList to have 6 element', () => {
 		Engine.addEntity(
-			getEntity(Engine.getUID(), Entity.EXAMPLE_A, {}, []),
-			getEntity(Engine.getUID(), Entity.EXAMPLE_A, {}, [Component.COMPONENT_A]),
-			getEntity(Engine.getUID(), Entity.EXAMPLE_B, {}, []),
-			getEntity(Engine.getUID(), Entity.EXAMPLE_B, {}, [Component.COMPONENT_A]),
+			getEntity(Engine.getUID(), Entity.EXAMPLE_A, {}, [])(),
+			getEntity(Engine.getUID(), Entity.EXAMPLE_A, {}, [Component.COMPONENT_A])(),
+			getEntity(Engine.getUID(), Entity.EXAMPLE_B, {}, [])(),
+			getEntity(Engine.getUID(), Entity.EXAMPLE_B, {}, [Component.COMPONENT_A])(),
 			getEntity(Engine.getUID(), Entity.EXAMPLE_C, {}, [
 				Component.COMPONENT_A,
 				Component.COMPONENT_B,
-			]),
-			getEntity(Engine.getUID(), Entity.EXAMPLE_D, {}, [Component.COMPONENT_B]),
+			])(),
+			getEntity(Engine.getUID(), Entity.EXAMPLE_D, {}, [Component.COMPONENT_B])(),
 		);
 		assert(Engine.getEntityList().length === 6);
 	});

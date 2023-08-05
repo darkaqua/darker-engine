@@ -1,4 +1,4 @@
-import { EntityType } from '../src/index.ts';
+import { EntityTypeFunction } from '../src/index.ts';
 
 export enum Entity {
 	EXAMPLE_A,
@@ -18,12 +18,19 @@ export enum Component {
 	COMPONENT_C,
 }
 
+export type ComponentData = {
+	[Component.COMPONENT_A]: {};
+	[Component.COMPONENT_B]: {};
+	[Component.COMPONENT_C]: {};
+};
+
 export const getEntity = (
 	id: number,
-	type: number = Entity.EXAMPLE_A,
+	type: Entity = Entity.EXAMPLE_A,
 	data = {},
-	components: number[] = [],
-): EntityType<Entity, Component, any> => ({
+	components: Component[] = [],
+): EntityTypeFunction<Entity, Component, ComponentData> =>
+() => ({
 	id,
 	type,
 	data,

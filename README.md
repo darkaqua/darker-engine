@@ -115,7 +115,7 @@ type ComponentData = {
 
 export const Engine = darkerEngine<IEntities, IComponents, ComponentData>()
 
-const exampleEntity = (): EntityType<IEntities, IComponents, ComponentData> => ({
+const exampleEntity: EntityTypeFunction<IEntities, IComponents, ComponentData> = () => ({
   id: Engine.getUID(),
   type: IEntities.EXAMPLE_ENTITY,
   data: {
@@ -154,17 +154,17 @@ const exampleSystem: SystemFunction<IComponents> = () => {
 
   const onAdd = (id: number) => {
     const entity = Engine.getEntity(id);
-    entity.updateComponent?.(IComponents.EXAMPLE_COMPONENT, { foo: "fii" });
+    entity.updateComponent(IComponents.EXAMPLE_COMPONENT, { foo: 'fii'});
   }
 
-  const onUpdate = (id: number, component: IComponents) => {
+  const onUpdate = (id: number, component?: IComponents) => {
     const entity = Engine.getEntity(id);
 
     if (component !== IComponents.EXAMPLE_COMPONENT) return;
 
-    const { foo } = entity.getComponent?.(IComponents.EXAMPLE_COMPONENT);
-    if (foo === "fii" && !entity.hasComponent?.(IComponents.OTHER_COMPONENT)) {
-      entity.removeComponent?.(IComponents.EXAMPLE_COMPONENT);
+    const { foo } = entity.getComponent(IComponents.EXAMPLE_COMPONENT);
+    if (foo === "fii" && !entity.hasComponent(IComponents.OTHER_COMPONENT)) {
+      entity.removeComponent(IComponents.EXAMPLE_COMPONENT);
     }
   }
 
@@ -185,4 +185,5 @@ const exampleSystem: SystemFunction<IComponents> = () => {
 
 Engine.setSystems(exampleSystem);
 Engine.load()
+
 ```

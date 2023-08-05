@@ -9,7 +9,7 @@ export interface EngineType<I, C extends string | number, D> {
 	getEntityListByComponents: (...componentList: C[]) => EntityType<I, C, D>[];
 
 	getEntity: (id: number) => EntityType<I, C, D>;
-	addEntity: (...entities: EntityType<I, C, D>[]) => EntityType<I, C, D>[];
+	addEntity: (...entities: SimpleEntityType<I, C, D>[]) => EntityType<I, C, D>[];
 	removeEntity: (...idList: number[]) => void;
 
 	getSystem: (name: number) => SystemType<C> | undefined;
@@ -44,21 +44,33 @@ export type SystemFunction<C> = () => Omit<SystemType<C>, 'id'>;
 
 export interface EntityType<I, C extends string | number, D> {
 	//Only initial declaration
-	readonly id: number;
 	readonly type: I;
 	readonly data: Partial<D>;
 	readonly components: C[];
 
-	getData?: () => Record<number, any>;
-	getComponent?: <T extends keyof D>(
+	id: number;
+	getData: () => Record<number, any>;
+	getComponent: <T extends keyof D>(
 		component: T,
 		deepClone?: boolean,
-	) => D[T] | undefined;
-	getComponents?: () => C[];
-	hasComponent?: (component: number) => boolean;
-	updateComponent?: <T extends keyof D>(component: T, data?: D[T]) => void;
-	removeComponent?: RemoveComponentFunctionType<C>;
+	) => D[T];
+	getComponents: () => C[];
+	hasComponent: (component: number) => boolean;
+	updateComponent: <T extends keyof D>(component: T, data?: D[T]) => void;
+	removeComponent: RemoveComponentFunctionType<C>;
 }
+
+export type SimpleEntityType<I, C extends string | number, D> = Omit<
+	EntityType<I, C, D>,
+	| 'getData'
+	| 'getComponent'
+	| 'getComponents'
+	| 'hasComponent'
+	| 'updateComponent'
+	| 'removeComponent'
+>;
+
+export type EntityTypeFunction<I, C extends string | number, D> = () => SimpleEntityType<I, C, D>;
 
 export type UpdateComponentFunctionType<C> = <ComponentType>(
 	component: C,

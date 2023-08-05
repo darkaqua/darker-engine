@@ -1,4 +1,11 @@
-import { DarkerMap, EngineType, EntityType, SystemFunction, SystemType } from './types.ts';
+import {
+	DarkerMap,
+	EngineType,
+	EntityType,
+	SimpleEntityType,
+	SystemFunction,
+	SystemType,
+} from './types.ts';
 import { uid } from './uid.ts';
 
 export const engine = <I extends string | number, C extends string | number, D>(): EngineType<
@@ -64,7 +71,7 @@ export const engine = <I extends string | number, C extends string | number, D>(
 	const _entity_updateComponent = (
 		entityId: number,
 		component: C,
-		data: any ,
+		data: any,
 	) => {
 		const entity = getEntity(entityId);
 		if (!entityComponentMap[entityId]?.includes(component)) {
@@ -142,7 +149,7 @@ export const engine = <I extends string | number, C extends string | number, D>(
 		entityId: number,
 		component: T,
 		deepClone = false,
-	): D[T] | undefined => {
+	): D[T] => {
 		const entityData = entityDataMap[entityId];
 
 		return entityData && entityData[component]
@@ -183,9 +190,11 @@ export const engine = <I extends string | number, C extends string | number, D>(
 
 	const getEntity = (entityId: number) => entityList[entityId];
 
-	const addEntity = (...entities: EntityType<I, C, D>[]): EntityType<I, C, D>[] => {
+	const addEntity = (...rawEntities: SimpleEntityType<I, C, D>[]): EntityType<I, C, D>[] => {
 		const date = Date.now();
-		entities.forEach((entity) => {
+		const entities = rawEntities.map((rawEntity) => {
+			const entity = rawEntity as EntityType<I, C, D>;
+			entity.id = entity.id ?? getUID();
 			entity.getData = () => _entity_getData(entity.id);
 			entity.getComponent = (component, deepClone) =>
 				_entity_getComponent(entity.id, component, deepClone);
@@ -207,6 +216,7 @@ export const engine = <I extends string | number, C extends string | number, D>(
 				[b]: (acc as any)[b] || {},
 			}), entity.data) ?? {};
 			entityList[entity.id] = entity;
+			return entity;
 		});
 
 		entities.forEach((entity) => {
