@@ -35,7 +35,7 @@ npm install darker-engine
 ```ts
 import { engine as darkerEngine } from "darker-engine";
 
-export const Engine = darkerEngine();
+export const Engine = darkerEngine<IEntities, IComponents, ComponentData>();
 
 Engine.setSystems(...[]);
 
@@ -59,7 +59,7 @@ enum Components {
 ```ts
 import { EntityType } from "darker-engine";
 
-const exampleEntity = (): EntityType => ({
+const exampleEntity = (): EntityType<IEntities, IComponents, ComponentData> => ({
   id: Engine.getUID(),
   type: EntityType.EXAMPLE,
   data: {},
@@ -72,7 +72,7 @@ const exampleEntity = (): EntityType => ({
 ```ts
 import { SystemFunction } from "darker-engine";
 
-const exampleSystem: SystemFunction = () => {
+const exampleSystem: SystemFunction<IComponents> = () => {
   const onAdd = (entityId: number) => {};
   const onUpdate = (entityId: number, component: string) => {};
   const onRemove = (entityId: number) => {};
@@ -95,8 +95,6 @@ import {
   SystemFunction,
 } from "darker-engine";
 
-export const Engine = darkerEngine()
-
 enum IEntities {
   EXAMPLE_ENTITY,
 }
@@ -106,7 +104,18 @@ enum IComponents {
   OTHER_COMPONENT,
 }
 
-const exampleEntity = (): EntityType => ({
+type ComponentData = {
+  [IComponents.EXAMPLE_COMPONENT]: {
+    foo: string;
+  },
+  [IComponents.OTHER_COMPONENT]: {
+    bar: number;
+  };
+};
+
+export const Engine = darkerEngine<IEntities, IComponents, ComponentData>()
+
+const exampleEntity: EntityTypeFunction<IEntities, IComponents, ComponentData> = () => ({
   id: Engine.getUID(),
   type: IEntities.EXAMPLE_ENTITY,
   data: {
@@ -117,7 +126,7 @@ const exampleEntity = (): EntityType => ({
   components: [IComponents.EXAMPLE_COMPONENT],
 })
 
-const exampleSystem: SystemFunction = () => {
+const exampleSystem: SystemFunction<IComponents> = () => {
   let interval: number
 
   const onLoad = () => {
@@ -145,17 +154,17 @@ const exampleSystem: SystemFunction = () => {
 
   const onAdd = (id: number) => {
     const entity = Engine.getEntity(id);
-    entity.updateComponent?.(IComponents.EXAMPLE_COMPONENT, { foo: "fii" });
+    entity.updateComponent(IComponents.EXAMPLE_COMPONENT, { foo: 'fii'});
   }
 
-  const onUpdate = (id: number, component: IComponents) => {
+  const onUpdate = (id: number, component?: IComponents) => {
     const entity = Engine.getEntity(id);
 
     if (component !== IComponents.EXAMPLE_COMPONENT) return;
 
-    const { foo } = entity.getComponent?.(IComponents.EXAMPLE_COMPONENT);
-    if (foo === "fii" && !entity.hasComponent?.(IComponents.OTHER_COMPONENT)) {
-      entity.removeComponent?.(IComponents.EXAMPLE_COMPONENT);
+    const { foo } = entity.getComponent(IComponents.EXAMPLE_COMPONENT);
+    if (foo === "fii" && !entity.hasComponent(IComponents.OTHER_COMPONENT)) {
+      entity.removeComponent(IComponents.EXAMPLE_COMPONENT);
     }
   }
 
@@ -176,4 +185,5 @@ const exampleSystem: SystemFunction = () => {
 
 Engine.setSystems(exampleSystem);
 Engine.load()
+
 ```

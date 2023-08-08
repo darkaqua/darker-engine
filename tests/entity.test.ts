@@ -1,28 +1,28 @@
 import { assertEquals, assertNotEquals } from 'https://deno.land/std@0.195.0/testing/asserts.ts';
 import { spy } from 'https://deno.land/std@0.195.0/testing/mock.ts';
 
-import { engine, SystemFunction } from '../src/index.ts';
-import { Component, getEntity, System } from './utils.ts';
+import { engine, EntityType, SystemFunction } from '../src/index.ts';
+import { Component, ComponentData, Entity, getEntity, System } from './utils.ts';
 
 Deno.test('Entity', async (test) => {
-	const Engine = engine();
+	const Engine = engine<Entity, Component, ComponentData>();
 
 	const onAddSystemAMock = spy(() => {});
 	const onAddSystemBMock = spy(() => {});
 
-	const systemA: SystemFunction = () => ({
+	const systemA: SystemFunction<Component> = () => ({
 		id: System.SYSTEM_A,
 		components: [Component.COMPONENT_A],
 		onAdd: onAddSystemAMock,
 	});
-	const systemB: SystemFunction = () => ({
+	const systemB: SystemFunction<Component> = () => ({
 		id: System.SYSTEM_B,
 		components: [Component.COMPONENT_A, Component.COMPONENT_B],
 		onAdd: onAddSystemBMock,
 	});
 	Engine.setSystems(systemA, systemB);
 
-	const entityA = getEntity(Engine.getUID(), 0);
+	const entityA = getEntity(Engine.getUID(), 0)() as EntityType<Entity, Component, ComponentData>;
 
 	await test.step('expect add an entity', () => {
 		Engine.addEntity(entityA);
@@ -39,7 +39,7 @@ Deno.test('Entity', async (test) => {
 	});
 
 	await test.step('expect raw data to be empty', () => {
-		assertEquals(entityA?.getData?.(), {});
+		assertEquals(entityA.getData(), {});
 	});
 
 	const componentData = {
@@ -49,13 +49,13 @@ Deno.test('Entity', async (test) => {
 	await test.step('expect update component data', () => {
 		Engine.addEntity(entityA);
 
-		entityA?.updateComponent?.(Component.COMPONENT_A, componentData);
+		entityA.updateComponent(Component.COMPONENT_A, componentData);
 
-		assertEquals(entityA?.getComponent?.(Component.COMPONENT_A), componentData);
+		assertEquals(entityA.getComponent(Component.COMPONENT_A), componentData);
 	});
 
 	await test.step('expect entity raw data to contain data', () => {
-		assertEquals(entityA?.getData?.(), {
+		assertEquals(entityA.getData(), {
 			[Component.COMPONENT_A]: componentData,
 		});
 	});
@@ -65,9 +65,9 @@ Deno.test('Entity', async (test) => {
 
 		const componentData = { foo: 'faa', fii: 123 };
 
-		entityA?.updateComponent?.(Component.COMPONENT_C, componentData);
+		entityA.updateComponent(Component.COMPONENT_C, componentData);
 
-		assertEquals(entityA?.hasComponent?.(Component.COMPONENT_C), true);
-		assertEquals(entityA?.getComponent?.(Component.COMPONENT_C), componentData);
+		assertEquals(entityA.hasComponent(Component.COMPONENT_C), true);
+		assertEquals(entityA.getComponent(Component.COMPONENT_C), componentData);
 	});
 });
