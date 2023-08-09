@@ -54,10 +54,14 @@ export interface EntityType<I, C extends string | number, D> {
 		component: T,
 		deepClone?: boolean,
 	) => D[T];
+	getComponentsData: <T extends keyof D>(
+		components: T[],
+		deepClone?: boolean,
+	) => { [K in T]: D[K] };
 	getComponents: () => C[];
 	hasComponent: (component: number) => boolean;
-	updateComponent: <T extends keyof D>(component: T, data?: D[T]) => void;
-	removeComponent: RemoveComponentFunctionType<C>;
+	updateComponent: <T extends keyof D>(component: T, data?: D[T]) => EntityType<I, C, D>;
+	removeComponent: (component: C) => void;
 }
 
 export type SimpleEntityType<I, C extends string | number, D> = Omit<
@@ -65,13 +69,12 @@ export type SimpleEntityType<I, C extends string | number, D> = Omit<
 	| 'getData'
 	| 'getComponent'
 	| 'getComponents'
+	| 'getComponentsData'
 	| 'hasComponent'
 	| 'updateComponent'
 	| 'removeComponent'
 >;
 
 export type EntityTypeFunction<I, C extends string | number, D> = () => SimpleEntityType<I, C, D>;
-
-export type RemoveComponentFunctionType<C> = (component: C) => void;
 
 export type DarkerMap<T extends string | number, S> = { [key in T]: S };
