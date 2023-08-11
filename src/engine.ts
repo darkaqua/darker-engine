@@ -143,7 +143,7 @@ export const engine = <I extends string | number, C extends string | number, D>(
 	};
 
 	// TODO: maintain original order, not this shit
-	const _entity_getComponents = (entityId: number) => entityComponentMap[entityId];
+	const _entity_getComponentTypes = (entityId: number) => entityComponentMap[entityId];
 
 	const _entity_getComponent = <T extends keyof D>(
 		entityId: number,
@@ -159,7 +159,7 @@ export const engine = <I extends string | number, C extends string | number, D>(
 			: {};
 	};
 
-	const _entity_getComponentsData = <T extends keyof D>(
+	const _entity_getComponents = <T extends keyof D>(
 		entityId: number,
 		components: T[],
 		deepClone = false,
@@ -214,9 +214,9 @@ export const engine = <I extends string | number, C extends string | number, D>(
 			entity.getData = () => _entity_getData(entity.id);
 			entity.getComponent = (component, deepClone) =>
 				_entity_getComponent(entity.id, component, deepClone);
-			entity.getComponents = () => _entity_getComponents(entity.id);
-			entity.getComponentsData = (components, deepClone) =>
-				_entity_getComponentsData(entity.id, components, deepClone);
+			entity.getComponentTypes = () => _entity_getComponentTypes(entity.id);
+			entity.getComponents = (components, deepClone) =>
+				_entity_getComponents(entity.id, components, deepClone);
 			entity.hasComponent = (component) => _entity_hasComponent(entity.id, component);
 			entity.removeComponent = (component) => _entity_removeComponent(entity.id, component);
 			entity.updateComponent = (component, data) =>
@@ -229,7 +229,7 @@ export const engine = <I extends string | number, C extends string | number, D>(
 
 			entityComponentMap[entity.id] = entity.components;
 
-			entityDataMap[entity.id] = entity?.getComponents?.().reduce((acc, b) => ({
+			entityDataMap[entity.id] = entity?.getComponentTypes?.().reduce((acc, b) => ({
 				...acc,
 				[b]: (acc as any)[b] || {},
 			}), entity.data) ?? {};
@@ -284,7 +284,7 @@ export const engine = <I extends string | number, C extends string | number, D>(
 		const _entityList = entityIdList.map((entityId) => entityList[entityId]);
 		_entityList.map((entity) => {
 			if (!entity) return;
-			const componentEntityList = entity?.getComponents?.();
+			const componentEntityList = entity?.getComponentTypes?.();
 			if (!componentEntityList) return;
 
 			// Calculate points from component order.
