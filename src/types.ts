@@ -59,8 +59,9 @@ export interface EntityType<I, C extends string | number, D> {
 		deepClone?: boolean,
 	) => { [K in T]: D[K] };
 	getComponentTypes: () => C[];
-	hasComponent: (component: number) => boolean;
-	updateComponent: <T extends keyof D>(component: T, data?: D[T]) => EntityType<I, C, D>;
+	hasComponent: (component: C) => boolean;
+	hasComponents: (components: C[]) => boolean;
+	updateComponent: <T extends keyof D>(component: T, data?: Partial<D[T]>) => EntityType<I, C, D>;
 	removeComponent: (component: C) => void;
 }
 
@@ -71,6 +72,7 @@ export type SimpleEntityType<I, C extends string | number, D> = Omit<
 	| 'getComponents'
 	| 'getComponentTypes'
 	| 'hasComponent'
+	| 'hasComponents'
 	| 'updateComponent'
 	| 'removeComponent'
 >;

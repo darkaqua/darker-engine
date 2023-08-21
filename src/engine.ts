@@ -175,7 +175,10 @@ export const engine = <I extends string | number, C extends string | number, D>(
 		}, {} as { [K in T]: D[K] });
 	};
 
-	const _entity_hasComponent = (entityId: number, component: any) =>
+	const _entity_hasComponents = (entityId: number, components: C[]) =>
+		components.every((component) => entityComponentMap[entityId]?.includes(component));
+
+	const _entity_hasComponent = (entityId: number, component: C) =>
 		entityComponentMap[entityId]?.includes(component);
 
 	const _entity_getData = (entityId: number) => structuredClone(entityDataMap[entityId]);
@@ -218,6 +221,7 @@ export const engine = <I extends string | number, C extends string | number, D>(
 			entity.getComponents = (components, deepClone) =>
 				_entity_getComponents(entity.id, components, deepClone);
 			entity.hasComponent = (component) => _entity_hasComponent(entity.id, component);
+			entity.hasComponents = (components) => _entity_hasComponents(entity.id, components);
 			entity.removeComponent = (component) => _entity_removeComponent(entity.id, component);
 			entity.updateComponent = (component, data) =>
 				_entity_updateComponent(entity.id, component as unknown as C, data);
