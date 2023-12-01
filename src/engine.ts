@@ -21,8 +21,8 @@ export const engine = <I extends string | number, C extends string | number, D>(
 	let entityDataMap: DarkerMap<number, any> = [];
 	// Contains which entities has every system
 	let systemEntitiesMap: number[][] = [];
-
-	const { getUID } = uid();
+	
+	const { getUID } = uid(() => entityList);
 
 	const setSystems = (..._systems: SystemFunction<C>[]) => {
 		systems = [];

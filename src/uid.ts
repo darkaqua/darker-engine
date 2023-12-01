@@ -1,8 +1,10 @@
-export const uid = () => {
+export const uid = (getEntityList) => {
 	let lastId = 0;
 
 	const getUID = () => {
-		lastId++;
+		do {
+			lastId++;
+		} while (getEntityList()[lastId]);
 		return lastId;
 	};
 
