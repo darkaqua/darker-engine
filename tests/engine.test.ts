@@ -6,12 +6,14 @@ import {
 
 import { engine, SystemFunction } from '../src/index.ts';
 import { Component, ComponentData, Entity, getEntity, System } from './utils.ts';
+import { uid, UIDKey } from '../src/uid.ts';
 
 Deno.test('Engine', async (test) => {
 	const Engine = engine<Entity, Component, ComponentData>();
+	const { getUID } = uid(Engine.getEntityList);
 
 	await test.step('expect Engine.getUID to be 1', () => {
-		assertEquals(Engine.getUID(), 1);
+		assertEquals(getUID(UIDKey.ENTITY), 1);
 	});
 
 	await test.step('expect Engine.getEntityList to be empty', () => {
@@ -22,12 +24,13 @@ Deno.test('Engine', async (test) => {
 		assertEquals(Engine.getSystem(System.SYSTEM_A), undefined);
 	});
 
-	await test.step('expect Engine.setSystems to add a system', () => {
-		const system: SystemFunction<Component> = () => ({
+	await test.step('expect Engine.setSystems to add a system', async () => {
+		const system: SystemFunction<Component> = async () => ({
 			id: System.SYSTEM_B,
 			components: [],
 		});
-		Engine.setSystems(system);
+
+		await Engine.setSystems(system);
 
 		const foundSystem = Engine.getSystem(System.SYSTEM_B);
 		assertNotEquals(foundSystem, undefined);
@@ -39,15 +42,15 @@ Deno.test('Engine', async (test) => {
 
 	await test.step('expect Engine.getEntityList to have 6 element', () => {
 		Engine.addEntity(
-			getEntity(Engine.getUID(), Entity.EXAMPLE_A, {}, [])(),
-			getEntity(Engine.getUID(), Entity.EXAMPLE_A, {}, [Component.COMPONENT_A])(),
-			getEntity(Engine.getUID(), Entity.EXAMPLE_B, {}, [])(),
-			getEntity(Engine.getUID(), Entity.EXAMPLE_B, {}, [Component.COMPONENT_A])(),
-			getEntity(Engine.getUID(), Entity.EXAMPLE_C, {}, [
+			getEntity(getUID(UIDKey.ENTITY), Entity.EXAMPLE_A, {}, [])({}),
+			getEntity(getUID(UIDKey.ENTITY), Entity.EXAMPLE_A, {}, [Component.COMPONENT_A])({}),
+			getEntity(getUID(UIDKey.ENTITY), Entity.EXAMPLE_B, {}, [])({}),
+			getEntity(getUID(UIDKey.ENTITY), Entity.EXAMPLE_B, {}, [Component.COMPONENT_A])({}),
+			getEntity(getUID(UIDKey.ENTITY), Entity.EXAMPLE_C, {}, [
 				Component.COMPONENT_A,
 				Component.COMPONENT_B,
-			])(),
-			getEntity(Engine.getUID(), Entity.EXAMPLE_D, {}, [Component.COMPONENT_B])(),
+			])({}),
+			getEntity(getUID(UIDKey.ENTITY), Entity.EXAMPLE_D, {}, [Component.COMPONENT_B])({}),
 		);
 		assert(Engine.getEntityList().length === 6);
 	});
