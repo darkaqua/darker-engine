@@ -24,7 +24,7 @@ export type ComponentData = {
 	[Component.COMPONENT_C]: {};
 };
 
-type EntityProps = {}
+type EntityProps = {};
 export const getEntity = (
 	id: number,
 	type: Entity = Entity.EXAMPLE_A,

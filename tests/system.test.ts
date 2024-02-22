@@ -52,7 +52,9 @@ Deno.test('System', async (test) => {
 	});
 	await Engine.setSystems(systemA, systemB);
 
-	const entityA = getEntity(getUID(UIDKey.ENTITY), 0, {}, [Component.COMPONENT_A])({}) as EntityType<
+	const entityA = getEntity(getUID(UIDKey.ENTITY), 0, {}, [Component.COMPONENT_A])(
+		{},
+	) as EntityType<
 		Entity,
 		Component,
 		ComponentData

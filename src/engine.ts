@@ -87,10 +87,10 @@ export const engine = <
 	) => {
 		const entity = getEntity(entityId);
 		if (!entity) {
-			 console.warn(
+			console.warn(
 				`Warning "updateComponent::(${entityId},${component})" undefined`,
 			);
-			return entity
+			return entity;
 		}
 
 		if (!entityComponentMap[entityId]?.includes(component)) {
@@ -135,7 +135,7 @@ export const engine = <
 			console.warn(
 				`Warning "addComponent::(${entityId},${component})" undefined`,
 			);
-			return entity
+			return entity;
 		}
 
 		entityComponentMap[entity.id].push(component);

@@ -1,6 +1,8 @@
-import {EntityType} from "./types.ts";
+import { EntityType } from './types.ts';
 
-export const uid = <I, C extends string | number, D>(getEntityList: () => EntityType<I, C, D>[]) => {
+export const uid = <I, C extends string | number, D>(
+	getEntityList: () => EntityType<I, C, D>[],
+) => {
 	const lastSafeIdMap: Record<UIDKey, number> = {
 		[UIDKey.ENTITY]: 0,
 		[UIDKey.SYSTEM]: 0, //<< meh
@@ -10,7 +12,8 @@ export const uid = <I, C extends string | number, D>(getEntityList: () => Entity
 		[UIDKey.SYSTEM]: 0,
 	};
 	const idCheckMapFunc: Record<UIDKey, (currentId?: number) => boolean> = {
-		[UIDKey.ENTITY]: (currentId?: number) => currentId !== undefined && getEntityList()[currentId] !== undefined,
+		[UIDKey.ENTITY]: (currentId?: number) =>
+			currentId !== undefined && getEntityList()[currentId] !== undefined,
 		[UIDKey.SYSTEM]: () => false,
 	};
 
