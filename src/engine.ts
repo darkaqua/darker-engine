@@ -629,7 +629,7 @@ export const engine = <
 
 		if (onTick) onTick(status);
 		const nextTick = Math.max(0, interval - (Date.now() - lastTick));
-		console.log({ lastTick, deltaTime, interval, next: nextTick });
+		// console.log({ lastTick, deltaTime, interval, next: nextTick });
 		setTimeout(loop, nextTick);
 	};
 
