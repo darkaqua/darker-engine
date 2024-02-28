@@ -1,10 +1,23 @@
 import {
+	ActionCompleted,
+	ActionTypes,
+	AddComponentProps,
+	AddEntityProcessorProps,
+	AddEntityProps,
 	DarkerMap,
 	EngineType,
 	EntityType,
-	SimpleEntityType,
+	LoadConfig,
+	Priority,
+	QueueAction,
+	RemoveComponentProcessorProps,
+	RemoveComponentProps,
+	RemoveEntityProcessorProps,
+	RemoveEntityProps,
 	SystemFunction,
 	SystemType,
+	UpdateComponentProcessorProps,
+	UpdateComponentProps,
 } from './types.ts';
 import { uid, UIDKey } from './uid.ts';
 
@@ -13,7 +26,6 @@ export const engine = <
 	C extends string | number,
 	D,
 >(): EngineType<I, C, D> => {
-	let rawSystems: SystemFunction<C>[] = []; // TODO: remove??
 	let systems: SystemType<C>[] = [];
 	let entityList: EntityType<I, C, D>[] = [];
 	let typeEntityMap: DarkerMap<I, number[]> = {} as DarkerMap<I, number[]>;
@@ -23,10 +35,18 @@ export const engine = <
 	// Contains which entities has every system
 	let systemEntitiesMap: number[][] = [];
 
+	let queueLow: QueueAction<I, C, D>[] = [];
+	let queueMedium: QueueAction<I, C, D>[] = [];
+	let queueHigh: QueueAction<I, C, D>[] = [];
+
+	let loopRunning = false;
+	let ticks = 60;
+	let onTick: ((action: ActionCompleted | undefined) => void) | undefined = undefined;
+	let lastTick = Date.now();
+
 	const { getUID } = uid(() => entityList);
 
 	const setSystems = async (..._systems: SystemFunction<C>[]) => {
-		rawSystems = [..._systems];
 		systems = [];
 		systemEntitiesMap = [];
 
@@ -39,7 +59,57 @@ export const engine = <
 		}
 	};
 
-	const _entity_removeComponent = async (entityId: number, component: C) => {
+	const _entity_updateComponent = async <T extends keyof D>({
+		force = false,
+		priority = Priority.MEDIUM,
+		entityId,
+		component,
+		data,
+	}: UpdateComponentProps<C, D, T>) => {
+		if (force) {
+			return _processor_entity_updateComponent({ entityId, component, data });
+		}
+
+		const queue: QueueAction<I, C, D> = {
+			id: getUID(UIDKey.INTERNAL),
+			type: ActionTypes.UPDATE_COMPONENT,
+			priority,
+			payload: {
+				entityId,
+				component,
+				data,
+			},
+		};
+
+		return addActionToQueue(queue);
+	};
+
+	const _entity_removeComponent = async ({
+		force = false,
+		priority = Priority.MEDIUM,
+		entityId,
+		component,
+	}: RemoveComponentProps<C>) => {
+		if (force) {
+			return _processor_entity_removeComponent({ entityId, component });
+		}
+
+		const queue: QueueAction<I, C, D> = {
+			id: getUID(UIDKey.INTERNAL),
+			type: ActionTypes.REMOVE_COMPONENT,
+			priority,
+			payload: {
+				entityId,
+				component,
+			},
+		};
+
+		return addActionToQueue(queue);
+	};
+
+	const _processor_entity_removeComponent = async (
+		{ entityId, component }: RemoveComponentProcessorProps<C>,
+	) => {
 		const entity = getEntity(entityId);
 		if (!entity) {
 			return console.warn(
@@ -80,11 +150,11 @@ export const engine = <
 		return;
 	};
 
-	const _entity_updateComponent = async (
-		entityId: number,
-		component: C,
-		data: any,
-	) => {
+	const _processor_entity_updateComponent = async <T extends keyof D>({
+		entityId,
+		component,
+		data,
+	}: UpdateComponentProcessorProps<C, D, T>) => {
 		const entity = getEntity(entityId);
 		if (!entity) {
 			console.warn(
@@ -94,11 +164,11 @@ export const engine = <
 		}
 
 		if (!entityComponentMap[entityId]?.includes(component)) {
-			return await _entity_addComponent(entityId, component, data);
+			return await _processor_entity_addComponent({ entityId, component, data });
 		}
 
-		const currentData = entityDataMap[entity.id];
-		entityDataMap[entity.id] = {
+		const currentData = entityDataMap[entity.id!];
+		entityDataMap[entity.id!] = {
 			...currentData,
 			[component]: { ...(currentData[component] || {}), ...data },
 		};
@@ -125,11 +195,11 @@ export const engine = <
 		return entity;
 	};
 
-	const _entity_addComponent = async (
-		entityId: number,
-		component: C,
-		data = {},
-	) => {
+	const _processor_entity_addComponent = async <T extends keyof D>({
+		entityId,
+		component,
+		data,
+	}: AddComponentProps<C, D, T>) => {
 		const entity = getEntity(entityId);
 		if (!entity) {
 			console.warn(
@@ -138,9 +208,9 @@ export const engine = <
 			return entity;
 		}
 
-		entityComponentMap[entity.id].push(component);
-		entityDataMap[entity.id] = {
-			...entityDataMap[entity.id],
+		entityComponentMap[entity.id!].push(component);
+		entityDataMap[entity.id!] = {
+			...entityDataMap[entity.id!],
 			[component]: data,
 		};
 
@@ -220,7 +290,7 @@ export const engine = <
 	): EntityType<I, C, D>[] => {
 		return entityList
 			.reduce((list, entity) => {
-				const entityComponents = entityComponentMap[entity.id];
+				const entityComponents = entityComponentMap[entity.id!];
 				if (
 					componentList.length === 0 ||
 					componentList.every((component) => entityComponents.includes(component))
@@ -233,6 +303,48 @@ export const engine = <
 			.filter(Boolean);
 	};
 
+	const addEntity = async ({
+		force = false,
+		priority = Priority.MEDIUM,
+		entities,
+	}: AddEntityProps<I, C, D>) => {
+		if (force) {
+			return _processor_addEntity({ entities });
+		}
+
+		const queue: QueueAction<I, C, D> = {
+			id: getUID(UIDKey.INTERNAL),
+			type: ActionTypes.ADD_ENTITY,
+			priority,
+			payload: {
+				entities,
+			},
+		};
+
+		return addActionToQueue(queue);
+	};
+
+	const removeEntity = async ({
+		force = false,
+		priority = Priority.MEDIUM,
+		ids,
+	}: RemoveEntityProps) => {
+		if (force) {
+			return _processor_removeEntity({ ids });
+		}
+
+		const queue: QueueAction<I, C, D> = {
+			id: getUID(UIDKey.INTERNAL),
+			type: ActionTypes.REMOVE_ENTITY,
+			priority,
+			payload: {
+				ids,
+			},
+		};
+
+		return addActionToQueue(queue);
+	};
+
 	const getEntity = (entityId: number): EntityType<I, C, D> | undefined => {
 		const entity = entityList[entityId];
 		if (!entity) {
@@ -241,23 +353,29 @@ export const engine = <
 		return entity;
 	};
 
-	const addEntity = async (
-		...rawEntities: SimpleEntityType<I, C, D>[]
-	): Promise<EntityType<I, C, D>[]> => {
+	const _processor_addEntity = async ({
+		entities: rawEntities,
+	}: AddEntityProcessorProps<I, C, D>): Promise<EntityType<I, C, D>[]> => {
 		const date = Date.now();
 		const entities = rawEntities.map((rawEntity) => {
 			const entity = rawEntity as EntityType<I, C, D>;
+
 			entity.id = entity.id ?? getUID(UIDKey.ENTITY, entity.safe);
-			entity.getData = () => _entity_getData(entity.id);
+			entity.getData = () => _entity_getData(entity.id!);
 			entity.getComponent = (component, deepClone) =>
-				_entity_getComponent(entity.id, component, deepClone);
-			entity.getComponentTypes = () => _entity_getComponentTypes(entity.id);
+				_entity_getComponent(entity.id!, component, deepClone);
+			entity.getComponentTypes = () => _entity_getComponentTypes(entity.id!);
 			entity.getComponents = (components, deepClone) =>
-				_entity_getComponents(entity.id, components, deepClone);
-			entity.hasComponent = (component) => _entity_hasComponent(entity.id, component);
-			entity.removeComponent = (component) => _entity_removeComponent(entity.id, component);
-			entity.updateComponent = (component, data) =>
-				_entity_updateComponent(entity.id, component as unknown as C, data);
+				_entity_getComponents(entity.id!, components, deepClone);
+			entity.hasComponent = (component) => _entity_hasComponent(entity.id!, component);
+			entity.removeComponent = ({ component }) =>
+				_entity_removeComponent({ entityId: entity.id!, component });
+			entity.updateComponent = ({ component, data }) =>
+				_entity_updateComponent({
+					entityId: entity.id!,
+					component: component as unknown as C,
+					data,
+				});
 
 			if (!typeEntityMap[entity.type]) {
 				typeEntityMap[entity.type] = [];
@@ -266,7 +384,7 @@ export const engine = <
 
 			entityComponentMap[entity.id] = entity.components;
 
-			entityDataMap[entity.id] = entity?.getComponentTypes?.().reduce(
+			entityDataMap[entity.id] = entity?.getComponentTypes?.()?.reduce(
 				(acc, b) => ({
 					...acc,
 					[b]: (acc as any)[b] || {},
@@ -301,9 +419,9 @@ export const engine = <
 
 			for await (const system of systemList) {
 				const systemEntities = systemEntitiesMap[system.id];
-				systemEntitiesMap[system.id] = [...(systemEntities ?? []), entity.id];
+				systemEntitiesMap[system.id] = [...(systemEntities ?? []), entity.id!];
 				try {
-					await system?.onAdd?.(entity.id);
+					await system?.onAdd?.(entity.id!);
 				} catch (e) {
 					console.warn(
 						`Error catch system::${system.id} "onUpdate(${entity.id})"`,
@@ -322,8 +440,8 @@ export const engine = <
 		return entities;
 	};
 
-	const removeEntity = async (...entityIdList: number[]) => {
-		const _entityList = entityIdList.map((entityId) => entityList[entityId]);
+	const _processor_removeEntity = async ({ ids }: RemoveEntityProcessorProps) => {
+		const _entityList = ids.map((entityId) => entityList[entityId]);
 
 		for await (const entity of _entityList) {
 			if (!entity) return;
@@ -353,7 +471,7 @@ export const engine = <
 
 			for await (const system of systemList) {
 				try {
-					await system?.onRemove?.(entity.id);
+					await system?.onRemove?.(entity.id!);
 				} catch (e) {
 					console.warn(
 						`Error catch system::${system.id} "onRemove(${entity.id})"`,
@@ -364,9 +482,8 @@ export const engine = <
 				systemEntitiesMap[system.id] = systemEntities?.filter((_id) => _id !== entity.id) ?? [];
 			}
 
-			delete entityList[entity.id];
-
-			delete entityComponentMap[entity.id];
+			delete entityList[entity.id!];
+			delete entityComponentMap[entity.id!];
 
 			typeEntityMap[entity.type] = typeEntityMap[entity.type].filter(
 				(entityId) => entity.id !== entityId,
@@ -377,15 +494,26 @@ export const engine = <
 	const getSystem = (id: number) => systems[id];
 
 	const clear = () => {
+		loopRunning = false;
+
 		systems = [];
 		entityList = [];
 		typeEntityMap = {} as DarkerMap<I, number[]>;
 		entityComponentMap = [];
 		entityDataMap = [];
 		systemEntitiesMap = [];
+
+		queueLow = [];
+		queueMedium = [];
+		queueHigh = [];
 	};
 
-	const load = async () => {
+	const load = async ({ ticksPerSecond = 60, onTick: _onTick }: LoadConfig = {}) => {
+		ticks = ticksPerSecond;
+		onTick = _onTick;
+		loopRunning = true;
+		loop();
+
 		for await (const system of systems) {
 			await system?.onLoad?.();
 		}
@@ -447,6 +575,62 @@ export const engine = <
 			swapSystem,
 			getSystem,
 		};
+	};
+
+	const addActionToQueue = (action: QueueAction<I, C, D>): number => {
+		const queues = {
+			[Priority.HIGH]: queueHigh,
+			[Priority.MEDIUM]: queueMedium,
+			[Priority.LOW]: queueLow,
+		};
+
+		queues[action.priority || Priority.MEDIUM].push(action);
+
+		return action.id;
+	};
+
+	const queueProcessor = async (): Promise<undefined | ActionCompleted> => {
+		const queues = [queueHigh, queueMedium, queueLow];
+		const queue = queues.find((q) => q.length);
+		if (!queue) return undefined;
+
+		const ActionMap = {
+			[ActionTypes.ADD_ENTITY]: _processor_addEntity,
+			[ActionTypes.REMOVE_ENTITY]: _processor_removeEntity,
+			[ActionTypes.UPDATE_COMPONENT]: _processor_entity_updateComponent,
+			[ActionTypes.REMOVE_COMPONENT]: _processor_entity_removeComponent,
+		};
+
+		const task = queue.shift();
+		if (!task) return undefined;
+
+		const action = ActionMap[task.type];
+		const result = await action(task.payload as any);
+
+		return {
+			id: task.id,
+			type: task.type,
+			result,
+		};
+	};
+
+	const loop = async () => {
+		if (!loopRunning) return;
+
+		const now = Date.now();
+		const deltaTime = now - lastTick;
+		const interval = 1000 / ticks;
+
+		let status = undefined;
+		if (deltaTime > interval) {
+			lastTick = now - (deltaTime % interval);
+			status = await queueProcessor();
+		}
+
+		if (onTick) onTick(status);
+		const nextTick = Math.max(0, interval - (Date.now() - lastTick));
+		console.log({ lastTick, deltaTime, interval, next: nextTick });
+		setTimeout(loop, nextTick);
 	};
 
 	return {
