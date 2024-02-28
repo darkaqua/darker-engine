@@ -111,9 +111,9 @@ export interface EntityType<I, C extends string | number, D> {
 	getComponentTypes: () => C[];
 	hasComponent: (component: number) => boolean;
 	updateComponent: <T extends keyof D>(
-		config: UpdateComponentProps<C, D, T>,
+		config: Omit<UpdateComponentProps<C, D, T>, 'entityId'>,
 	) => Promise<number | EntityType<I, C, D> | undefined>;
-	removeComponent: (config: RemoveComponentProps<C>) => Promise<number | void>;
+	removeComponent: (config: Omit<RemoveComponentProps<C>, 'entityId'>) => Promise<number | void>;
 }
 
 export type SimpleEntityType<I, C extends string | number, D> = Omit<
