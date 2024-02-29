@@ -40,6 +40,7 @@ export const engine = <
 	let queueHigh: QueueAction<I, C, D>[] = [];
 
 	let loopRunning = false;
+	let loopId: number | undefined = undefined;
 	let ticks = 60;
 	let onTick: ((action: ActionCompleted | undefined) => void) | undefined = undefined;
 	let lastTick = Date.now();
@@ -368,10 +369,12 @@ export const engine = <
 			entity.getComponents = (components, deepClone) =>
 				_entity_getComponents(entity.id!, components, deepClone);
 			entity.hasComponent = (component) => _entity_hasComponent(entity.id!, component);
-			entity.removeComponent = ({ component }) =>
-				_entity_removeComponent({ entityId: entity.id!, component });
-			entity.updateComponent = ({ component, data }) =>
+			entity.removeComponent = ({ force = false, priority = Priority.MEDIUM, component }) =>
+				_entity_removeComponent({ force, priority, entityId: entity.id!, component });
+			entity.updateComponent = ({ force = false, priority = Priority.MEDIUM, component, data }) =>
 				_entity_updateComponent({
+					force,
+					priority,
 					entityId: entity.id!,
 					component: component as unknown as C,
 					data,
@@ -495,6 +498,7 @@ export const engine = <
 
 	const clear = () => {
 		loopRunning = false;
+		clearTimeout(loopId);
 
 		systems = [];
 		entityList = [];
@@ -630,7 +634,7 @@ export const engine = <
 		if (onTick) onTick(status);
 		const nextTick = Math.max(0, interval - (Date.now() - lastTick));
 		// console.log({ lastTick, deltaTime, interval, next: nextTick });
-		setTimeout(loop, nextTick);
+		loopId = setTimeout(loop, nextTick);
 	};
 
 	return {

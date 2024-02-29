@@ -86,7 +86,11 @@ Deno.test('System', async (test) => {
 		await t.step(
 			'expect entity to be updated on a system A and not to be called on system B',
 			async () => {
-				await entityA.updateComponent({ force: true, component: Component.COMPONENT_A, data: {} });
+				await entityA.updateComponent({
+					force: true,
+					component: Component.COMPONENT_A,
+					data: {},
+				});
 
 				assertSpyCallArgs(onUpdateSystemAMock, 0, 0, [
 					entityA.id,
@@ -162,10 +166,12 @@ Deno.test('System', async (test) => {
 
 	await test.step('onLoad', async (t) => {
 		await t.step('expect onLoad to be called inside system', async () => {
-			await Engine.load();
+			await Engine.load({ ticksPerSecond: 1 });
 
 			assertSpyCall(onLoadSystemAMock, 0);
 			assertSpyCall(onLoadSystemBMock, 0);
+
+			Engine.clear();
 		});
 	});
 });
