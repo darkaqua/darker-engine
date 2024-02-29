@@ -24,12 +24,13 @@ export type ComponentData = {
 	[Component.COMPONENT_C]: {};
 };
 
+type EntityProps = {};
 export const getEntity = (
 	id: number,
 	type: Entity = Entity.EXAMPLE_A,
 	data = {},
 	components: Component[] = [],
-): EntityTypeFunction<Entity, Component, ComponentData> =>
+): EntityTypeFunction<Entity, Component, ComponentData, EntityProps> =>
 () => ({
 	id,
 	type,
