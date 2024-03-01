@@ -42,8 +42,10 @@ export const engine = <
 	let loopRunning = false;
 	let loopId: number | undefined = undefined;
 	let ticks = 60;
+	let intervalTicks = 16;
 	let onTick: ((action: ActionCompleted | undefined) => void) | undefined = undefined;
 	let lastTick = Date.now();
+	let idealTick = Date.now();
 
 	const { getUID } = uid(() => entityList);
 
@@ -514,6 +516,7 @@ export const engine = <
 
 	const load = async ({ ticksPerSecond = 60, onTick: _onTick }: LoadConfig = {}) => {
 		ticks = ticksPerSecond;
+		intervalTicks = 1000 / ticks;
 		onTick = _onTick;
 		loopRunning = true;
 		loop();
@@ -623,17 +626,18 @@ export const engine = <
 
 		const now = Date.now();
 		const deltaTime = now - lastTick;
-		const interval = 1000 / ticks;
 
 		let status = undefined;
-		if (deltaTime > interval) {
-			lastTick = now - (deltaTime % interval);
+		if (deltaTime > intervalTicks) {
+			lastTick = now - (deltaTime % intervalTicks);
 			status = await queueProcessor();
 		}
 
 		if (onTick) onTick(status);
-		const nextTick = Math.max(0, interval - (Date.now() - lastTick));
-		// console.log({ lastTick, deltaTime, interval, next: nextTick });
+
+		idealTick += intervalTicks;
+		const nextTick = Math.max(0, idealTick - Date.now());
+		// console.log({ lastTick, delta: deltaTime, interval: intervalTicks, next: nextTick });
 		loopId = setTimeout(loop, nextTick);
 	};
 
