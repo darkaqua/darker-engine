@@ -62,6 +62,8 @@ export interface EngineType<I, C extends string | number, D> {
 	load: (config?: LoadConfig) => Promise<void>;
 	hardReload: () => Promise<void>;
 
+	onTick: OnTickFunction;
+	
 	__debug__: {
 		swapSystem: (systemId: number, system: SystemFunction<C>) => Promise<void>;
 		getSystem: (name: string) => SystemType<C> | undefined;
@@ -70,7 +72,6 @@ export interface EngineType<I, C extends string | number, D> {
 
 export type LoadConfig = {
 	ticksPerSecond?: number;
-	onTick?: (action: ActionCompleted | undefined) => void;
 };
 /**
  * System
@@ -166,3 +167,9 @@ export type ActionCompleted = {
 	type: ActionTypes;
 	result: any;
 };
+
+export type OnTickFunction = (data: {
+	status: ActionCompleted | undefined,
+	interval: number,
+	nextTick: number
+}) => void;

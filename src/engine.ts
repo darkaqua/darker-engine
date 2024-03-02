@@ -8,6 +8,7 @@ import {
 	EngineType,
 	EntityType,
 	LoadConfig,
+	OnTickFunction,
 	Priority,
 	QueueAction,
 	RemoveComponentProcessorProps,
@@ -42,8 +43,8 @@ export const engine = <
 	let loopRunning = false;
 	let loopId: number | undefined = undefined;
 	let ticks = 60;
-	let intervalTicks = 16;
-	let onTick: ((action: ActionCompleted | undefined) => void) | undefined = undefined;
+	let intervalTicks = 1000 / ticks;
+	let _onTick: ((action: ActionCompleted | undefined) => void) | undefined = undefined;
 	let lastTick = Date.now();
 	let idealTick = Date.now();
 
@@ -514,10 +515,9 @@ export const engine = <
 		queueHigh = [];
 	};
 
-	const load = async ({ ticksPerSecond = 60, onTick: _onTick }: LoadConfig = {}) => {
+	const load = async ({ ticksPerSecond = 60 }: LoadConfig = {}) => {
 		ticks = ticksPerSecond;
 		intervalTicks = 1000 / ticks;
-		onTick = _onTick;
 		loopRunning = true;
 		loop();
 
@@ -633,13 +633,17 @@ export const engine = <
 			status = await queueProcessor();
 		}
 
-		if (onTick) onTick(status);
-
 		idealTick += intervalTicks;
 		const nextTick = Math.max(0, idealTick - Date.now());
-		// console.log({ lastTick, delta: deltaTime, interval: intervalTicks, next: nextTick });
+		
+		const ms = Date.now() - now;
+		const usage = Math.trunc((1 - nextTick / intervalTicks) * 100) / 100
+		if (_onTick) _onTick({ status, ms, usage });
+		
 		loopId = setTimeout(loop, nextTick);
 	};
+	
+	const onTick = (onTickCallback: OnTickFunction) => _onTick = onTickCallback;
 
 	return {
 		setSystems,
@@ -655,6 +659,8 @@ export const engine = <
 
 		load,
 		hardReload,
+		
+		onTick,
 
 		__debug__: debug(),
 	};
