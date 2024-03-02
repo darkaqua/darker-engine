@@ -62,8 +62,8 @@ export interface EngineType<I, C extends string | number, D> {
 	load: (config?: LoadConfig) => Promise<void>;
 	hardReload: () => Promise<void>;
 
-	onTick: OnTickFunction;
-	
+	onTick: (cb: OnTickFunction) => void;
+
 	__debug__: {
 		swapSystem: (systemId: number, system: SystemFunction<C>) => Promise<void>;
 		getSystem: (name: string) => SystemType<C> | undefined;
@@ -73,6 +73,7 @@ export interface EngineType<I, C extends string | number, D> {
 export type LoadConfig = {
 	ticksPerSecond?: number;
 };
+
 /**
  * System
  */
@@ -129,7 +130,7 @@ export type SimpleEntityType<I, C extends string | number, D> = Omit<
 >;
 
 export type EntityTypeFunction<I, C extends string | number, D, P> = (
-	props: P,
+	props?: P,
 ) => SimpleEntityType<I, C, D>;
 
 export type DarkerMap<T extends string | number, S> = { [key in T]: S };
@@ -162,6 +163,7 @@ export type QueueAction<I, C extends string | number, D, K extends ActionTypes =
 	payload: ActionPayloads<I, C, D>[K];
 };
 
+// TODO: add correct type for result
 export type ActionCompleted = {
 	id: number;
 	type: ActionTypes;
@@ -169,7 +171,7 @@ export type ActionCompleted = {
 };
 
 export type OnTickFunction = (data: {
-	status: ActionCompleted | undefined,
-	interval: number,
-	nextTick: number
+	status: ActionCompleted | undefined;
+	ms: number;
+	usage: number;
 }) => void;

@@ -44,7 +44,7 @@ export const engine = <
 	let loopId: number | undefined = undefined;
 	let ticks = 60;
 	let intervalTicks = 1000 / ticks;
-	let _onTick: ((action: ActionCompleted | undefined) => void) | undefined = undefined;
+	let _onTick: OnTickFunction | undefined = undefined;
 	let lastTick = Date.now();
 	let idealTick = Date.now();
 
@@ -635,14 +635,14 @@ export const engine = <
 
 		idealTick += intervalTicks;
 		const nextTick = Math.max(0, idealTick - Date.now());
-		
+
 		const ms = Date.now() - now;
-		const usage = Math.trunc((1 - nextTick / intervalTicks) * 100) / 100
+		const usage = Math.trunc((1 - nextTick / intervalTicks) * 100) / 100;
 		if (_onTick) _onTick({ status, ms, usage });
-		
+
 		loopId = setTimeout(loop, nextTick);
 	};
-	
+
 	const onTick = (onTickCallback: OnTickFunction) => _onTick = onTickCallback;
 
 	return {
@@ -659,7 +659,7 @@ export const engine = <
 
 		load,
 		hardReload,
-		
+
 		onTick,
 
 		__debug__: debug(),
