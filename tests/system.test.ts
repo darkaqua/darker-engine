@@ -69,7 +69,10 @@ Deno.test('System', async (test) => {
 		await t.step(
 			'expect entity to be added on a system A but not system B',
 			async () => {
-				await Engine.addEntity(entityA);
+				await Engine.addEntity({
+					force: true,
+					entities: [entityA],
+				});
 
 				assertSpyCallArg(onAddSystemAMock, 0, 0, entityA.id);
 				assertSpyCalls(onAddSystemBMock, 0);
@@ -78,12 +81,16 @@ Deno.test('System', async (test) => {
 	});
 
 	await test.step('onUpdate', async (t) => {
-		await entityA.removeComponent(Component.COMPONENT_B);
+		await entityA.removeComponent({ force: true, component: Component.COMPONENT_B });
 
 		await t.step(
 			'expect entity to be updated on a system A and not to be called on system B',
 			async () => {
-				await entityA.updateComponent(Component.COMPONENT_A, {});
+				await entityA.updateComponent({
+					force: true,
+					component: Component.COMPONENT_A,
+					data: {},
+				});
 
 				assertSpyCallArgs(onUpdateSystemAMock, 0, 0, [
 					entityA.id,
@@ -96,14 +103,14 @@ Deno.test('System', async (test) => {
 		await t.step(
 			'expect add component on entity and be added on a system B',
 			async () => {
-				await entityA.updateComponent(Component.COMPONENT_B, {});
+				await entityA.updateComponent({ force: true, component: Component.COMPONENT_B, data: {} });
 
 				assertSpyCallArg(onAddSystemBMock, 0, 0, entityA.id);
 			},
 		);
 
 		await t.step('expect entity to be updated on system A and B', async () => {
-			await entityA.updateComponent(Component.COMPONENT_A, {});
+			await entityA.updateComponent({ force: true, component: Component.COMPONENT_A, data: {} });
 
 			assertSpyCallArgs(onUpdateSystemAMock, 0, 0, [
 				entityA.id,
@@ -116,7 +123,7 @@ Deno.test('System', async (test) => {
 		});
 
 		await t.step('expect entity to be updated only on system B', async () => {
-			await entityA.updateComponent(Component.COMPONENT_B, {});
+			await entityA.updateComponent({ force: true, component: Component.COMPONENT_B, data: {} });
 
 			// Good "ñapa" but works \o/
 			try {
@@ -140,7 +147,7 @@ Deno.test('System', async (test) => {
 		await t.step(
 			'expect remove entity component and be removed from system B',
 			async () => {
-				await entityA.removeComponent(Component.COMPONENT_B);
+				await entityA.removeComponent({ force: true, component: Component.COMPONENT_B });
 
 				assertSpyCalls(onRemoveSystemAMock, 0);
 				assertSpyCallArg(onRemoveSystemBMock, 0, 0, entityA.id);
@@ -150,7 +157,7 @@ Deno.test('System', async (test) => {
 		await t.step(
 			'expect remove entity component and be removed from system A',
 			async () => {
-				await entityA.removeComponent(Component.COMPONENT_A);
+				await entityA.removeComponent({ force: true, component: Component.COMPONENT_A });
 
 				assertSpyCallArg(onRemoveSystemAMock, 0, 0, entityA.id);
 			},
@@ -159,10 +166,12 @@ Deno.test('System', async (test) => {
 
 	await test.step('onLoad', async (t) => {
 		await t.step('expect onLoad to be called inside system', async () => {
-			await Engine.load();
+			await Engine.load({ ticksPerSecond: 1 });
 
 			assertSpyCall(onLoadSystemAMock, 0);
 			assertSpyCall(onLoadSystemBMock, 0);
+
+			Engine.clear();
 		});
 	});
 });

@@ -30,17 +30,23 @@ Deno.test('Entity', async (test) => {
 		ComponentData
 	>;
 
-	await test.step('expect add an entity', () => {
-		Engine.addEntity(entityA);
+	await test.step('expect add an entity', async () => {
+		await Engine.addEntity({
+			force: true,
+			entities: [entityA],
+		});
 
-		const retrievedEntity = Engine.getEntity(entityA.id);
+		const retrievedEntity = Engine.getEntity(entityA.id!);
 		assertEquals(retrievedEntity?.id, entityA.id);
 	});
 
 	await test.step('expect remove an entity', async () => {
-		await Engine.removeEntity(entityA.id);
+		await Engine.removeEntity({
+			force: true,
+			ids: [entityA.id!],
+		});
 
-		const retrievedEntity = Engine.getEntity(entityA.id);
+		const retrievedEntity = Engine.getEntity(entityA.id!);
 		assertEquals(retrievedEntity, undefined);
 	});
 
@@ -52,10 +58,17 @@ Deno.test('Entity', async (test) => {
 		foo: 'faa',
 	};
 
-	await test.step('expect update component data', () => {
-		Engine.addEntity(entityA);
+	await test.step('expect update component data', async () => {
+		await Engine.addEntity({
+			force: true,
+			entities: [entityA],
+		});
 
-		entityA.updateComponent(Component.COMPONENT_A, componentData);
+		await entityA.updateComponent({
+			force: true,
+			component: Component.COMPONENT_A,
+			data: componentData,
+		});
 
 		assertEquals(entityA.getComponent(Component.COMPONENT_A), componentData);
 	});
@@ -66,12 +79,16 @@ Deno.test('Entity', async (test) => {
 		});
 	});
 
-	await test.step('expect to add new component to an existing entity', () => {
+	await test.step('expect to add new component to an existing entity', async () => {
 		assertNotEquals(entityA.id, undefined);
 
 		const componentData = { foo: 'faa', fii: 123 };
 
-		entityA.updateComponent(Component.COMPONENT_C, componentData);
+		await entityA.updateComponent({
+			force: true,
+			component: Component.COMPONENT_C,
+			data: componentData,
+		});
 
 		assertEquals(entityA.hasComponent(Component.COMPONENT_C), true);
 		assertEquals(entityA.getComponent(Component.COMPONENT_C), componentData);

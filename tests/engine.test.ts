@@ -40,18 +40,24 @@ Deno.test('Engine', async (test) => {
 		assertEquals(Engine.getEntityList(), []);
 	});
 
-	await test.step('expect Engine.getEntityList to have 6 element', () => {
-		Engine.addEntity(
-			getEntity(getUID(UIDKey.ENTITY), Entity.EXAMPLE_A, {}, [])({}),
-			getEntity(getUID(UIDKey.ENTITY), Entity.EXAMPLE_A, {}, [Component.COMPONENT_A])({}),
-			getEntity(getUID(UIDKey.ENTITY), Entity.EXAMPLE_B, {}, [])({}),
-			getEntity(getUID(UIDKey.ENTITY), Entity.EXAMPLE_B, {}, [Component.COMPONENT_A])({}),
-			getEntity(getUID(UIDKey.ENTITY), Entity.EXAMPLE_C, {}, [
-				Component.COMPONENT_A,
-				Component.COMPONENT_B,
-			])({}),
-			getEntity(getUID(UIDKey.ENTITY), Entity.EXAMPLE_D, {}, [Component.COMPONENT_B])({}),
+	await test.step('expect Engine.getEntityList to have 6 element', async () => {
+		await Engine.addEntity(
+			{
+				force: true,
+				entities: [
+					getEntity(getUID(UIDKey.ENTITY), Entity.EXAMPLE_A, {}, [])({}),
+					getEntity(getUID(UIDKey.ENTITY), Entity.EXAMPLE_A, {}, [Component.COMPONENT_A])({}),
+					getEntity(getUID(UIDKey.ENTITY), Entity.EXAMPLE_B, {}, [])({}),
+					getEntity(getUID(UIDKey.ENTITY), Entity.EXAMPLE_B, {}, [Component.COMPONENT_A])({}),
+					getEntity(getUID(UIDKey.ENTITY), Entity.EXAMPLE_C, {}, [
+						Component.COMPONENT_A,
+						Component.COMPONENT_B,
+					])({}),
+					getEntity(getUID(UIDKey.ENTITY), Entity.EXAMPLE_D, {}, [Component.COMPONENT_B])({}),
+				],
+			},
 		);
+
 		assert(Engine.getEntityList().length === 6);
 	});
 
