@@ -223,7 +223,7 @@ export const engine = <
 			// Cuando los sistemas no contengan la entidad actual
 			.filter((system) => {
 				const entities = systemEntitiesMap[system.id];
-				return !entities?.includes(entityId) ?? true;
+				return entities ? !entities.includes(entityId) : true;
 			})
 			// Cuando la entidad tenga los componentes correspondientes a ese sistema
 			.filter((system) =>
