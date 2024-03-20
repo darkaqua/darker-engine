@@ -529,6 +529,25 @@ export const engine = <
 		}
 	};
 
+	const pause = async () => {
+		for await (const system of systems) {
+			await system?.onPause?.();
+		}
+
+		loopRunning = false;
+	};
+
+	const resume = async () => {
+		lastTick = Date.now();
+		idealTick = Date.now();
+		loopRunning = true;
+		loop();
+
+		for await (const system of systems) {
+			await system?.onResume?.();
+		}
+	};
+
 	const hardReload = async () => {
 		for await (const system of [...systems].reverse().filter(Boolean)) {
 			const entities = systemEntitiesMap[system.id];
@@ -625,8 +644,6 @@ export const engine = <
 	};
 
 	const loop = async () => {
-		if (!loopRunning) return;
-
 		const now = Date.now();
 		const deltaTime = now - lastTick;
 
@@ -644,6 +661,8 @@ export const engine = <
 		if (_onTick) _onTick({ status, ms, usage, tickCount });
 
 		tickCount++;
+
+		if (!loopRunning) return;
 		loopId = setTimeout(loop, nextTick);
 	};
 
@@ -662,6 +681,9 @@ export const engine = <
 		clear,
 
 		load,
+		pause,
+		resume,
+
 		hardReload,
 
 		onTick,
