@@ -174,4 +174,5 @@ export type OnTickFunction = (data: {
 	status: ActionCompleted | undefined;
 	ms: number;
 	usage: number;
+	tickCount: number;
 }) => void;
