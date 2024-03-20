@@ -28,6 +28,12 @@ Deno.test('System', async (test) => {
 	const onLoadSystemAMock = spy(async () => {});
 	const onLoadSystemBMock = spy(async () => {});
 
+	const onPauseSystemAMock = spy(async () => {});
+	const onPauseSystemBMock = spy(async () => {});
+
+	const onResumeSystemAMock = spy(async () => {});
+	const onResumeSystemBMock = spy(async () => {});
+
 	const onDestroySystemAMock = spy(async () => {});
 	const onDestroySystemBMock = spy(async () => {});
 
@@ -38,6 +44,8 @@ Deno.test('System', async (test) => {
 		onUpdate: onUpdateSystemAMock,
 		onRemove: onRemoveSystemAMock,
 		onLoad: onLoadSystemAMock,
+		onPause: onPauseSystemAMock,
+		onResume: onResumeSystemAMock,
 		onDestroy: onDestroySystemAMock,
 	});
 
@@ -48,6 +56,8 @@ Deno.test('System', async (test) => {
 		onUpdate: onUpdateSystemBMock,
 		onRemove: onRemoveSystemBMock,
 		onLoad: onLoadSystemBMock,
+		onPause: onPauseSystemBMock,
+		onResume: onResumeSystemBMock,
 		onDestroy: onDestroySystemBMock,
 	});
 	await Engine.setSystems(systemA, systemB);
@@ -170,6 +180,30 @@ Deno.test('System', async (test) => {
 
 			assertSpyCall(onLoadSystemAMock, 0);
 			assertSpyCall(onLoadSystemBMock, 0);
+
+			Engine.clear();
+		});
+	});
+
+	await test.step('onPause', async (t) => {
+		await t.step('expect onPause to be called inside system', async () => {
+			await Engine.setSystems(systemA, systemB);
+			await Engine.pause();
+
+			assertSpyCall(onPauseSystemAMock, 0);
+			assertSpyCall(onPauseSystemBMock, 0);
+
+			Engine.clear();
+		});
+	});
+
+	await test.step('onResume', async (t) => {
+		await t.step('expect onResume to be called inside system', async () => {
+			await Engine.setSystems(systemA, systemB);
+			await Engine.resume();
+
+			assertSpyCall(onResumeSystemAMock, 0);
+			assertSpyCall(onResumeSystemBMock, 0);
 
 			Engine.clear();
 		});

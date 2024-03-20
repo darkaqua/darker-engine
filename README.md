@@ -54,6 +54,18 @@ Engine.onTick(({usage, ms, status}) => {
 // -> { ms: 2, usage: 0.02, actionId: 1 }
 ```
 
+With `Engine.pause` you can pause the entire engine loop. All systems will call `onPause` function before.
+
+```ts
+await Engine.pause()
+```
+
+With `Engine.resume` you can start again the engine loop. All systems will call `onResume` function after the loop restarts.
+
+```ts
+await Engine.resume()
+```
+
 #### Add Actions To Queue
 When we use `addEntity`, `removeEntity`, `entity.updateComponent` and `entity.removeComponent` we can specify if we want to perform the action immediately or assign it a priority.
 
@@ -237,9 +249,19 @@ const exampleSystem: SystemFunction<IComponents> = async () => {
     await Engine.removeEntity({ids: [entityId]})
   };
 
+  const onResume = async () => {
+    console.log('system wake up')
+  }
+
+  const onPause = async () => {
+    console.log('system paused')
+  }
+
   return {
     components: [IComponents.EXAMPLE_COMPONENT],
     onLoad,
+    onResume,
+    onPause,
     onDestroy,
     onAdd,
     onUpdate,
@@ -252,7 +274,7 @@ await Engine.load({
   ticksPerSecond: 2,
 })
 
-Engine.onTick(({usage, ms, status}) => {
-  console.log({ms, usage, actionId: status?.id})
+Engine.onTick(({usage, ms, status, tickCount}) => {
+  console.log({ ms, usage, status, tickCount})
 })
 ```

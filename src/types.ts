@@ -60,6 +60,8 @@ export interface EngineType<I, C extends string | number, D> {
 	clear: () => void;
 
 	load: (config?: LoadConfig) => Promise<void>;
+	pause: () => Promise<void>;
+	resume: () => Promise<void>;
 	hardReload: () => Promise<void>;
 
 	onTick: (cb: OnTickFunction) => void;
@@ -86,6 +88,8 @@ export interface SystemType<C> {
 	onRemove?: (id: number) => Promise<void>;
 
 	onLoad?: () => Promise<void>;
+	onResume?: () => Promise<void>;
+	onPause?: () => Promise<void>;
 	onDestroy?: () => Promise<void>;
 }
 
