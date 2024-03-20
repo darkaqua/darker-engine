@@ -514,7 +514,7 @@ export const engine = <
 		queueLow = [];
 		queueMedium = [];
 		queueHigh = [];
-		
+
 		tickCount = 0;
 	};
 
@@ -642,7 +642,7 @@ export const engine = <
 		const ms = Date.now() - now;
 		const usage = Math.trunc((1 - nextTick / intervalTicks) * 100) / 100;
 		if (_onTick) _onTick({ status, ms, usage, tickCount });
-		
+
 		tickCount++;
 		loopId = setTimeout(loop, nextTick);
 	};
