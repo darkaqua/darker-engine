@@ -47,6 +47,7 @@ export const engine = <
 	let _onTick: OnTickFunction | undefined = undefined;
 	let lastTick = Date.now();
 	let idealTick = Date.now();
+	let tickCount = 0;
 
 	const { getUID } = uid(() => entityList);
 
@@ -513,6 +514,8 @@ export const engine = <
 		queueLow = [];
 		queueMedium = [];
 		queueHigh = [];
+		
+		tickCount = 0;
 	};
 
 	const load = async ({ ticksPerSecond = 60 }: LoadConfig = {}) => {
@@ -638,8 +641,9 @@ export const engine = <
 
 		const ms = Date.now() - now;
 		const usage = Math.trunc((1 - nextTick / intervalTicks) * 100) / 100;
-		if (_onTick) _onTick({ status, ms, usage });
-
+		if (_onTick) _onTick({ status, ms, usage, tickCount });
+		
+		tickCount++;
 		loopId = setTimeout(loop, nextTick);
 	};
 
