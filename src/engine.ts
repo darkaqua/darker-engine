@@ -49,7 +49,7 @@ export const engine = <
 	let idealTick = Date.now();
 	let tickCount = 0;
 
-	const { getUID } = uid(() => entityList);
+	const { getUID, reset: resetUIDs } = uid(() => entityList);
 
 	const setSystems = async (..._systems: SystemFunction<C>[]) => {
 		systems = [];
@@ -516,6 +516,25 @@ export const engine = <
 		queueHigh = [];
 
 		tickCount = 0;
+
+		resetUIDs();
+	};
+
+	const destroy = async () => {
+		for (const system of [...systems].reverse().filter(Boolean)) {
+			const entities = systemEntitiesMap[system.id];
+			for (const entityId of [...entities].reverse()) {
+				if (!getEntity(entityId)) continue;
+
+				try {
+					system?.onRemove && (await system?.onRemove(entityId));
+				} catch (e) {}
+			}
+			try {
+				system?.onDestroy && (await system?.onDestroy());
+			} catch (e) {}
+		}
+		clear();
 	};
 
 	const load = async ({ ticksPerSecond = 60 }: LoadConfig = {}) => {
@@ -679,6 +698,7 @@ export const engine = <
 		getSystem,
 
 		clear,
+		destroy,
 
 		load,
 		pause,
