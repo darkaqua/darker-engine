@@ -25,7 +25,6 @@ export const uid = <I, C extends string | number, D>(
 
 		const _getUID = (): number => (safe ? lastSafeIdMap[key] : lastIdMap[key]) + increment;
 		do {
-			console.log(lastSafeIdMap[key]);
 			if (safe) lastSafeIdMap[key]++;
 			else lastIdMap[key]++;
 		} while (idCheckMapFunc[key](_getUID()));
