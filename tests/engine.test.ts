@@ -10,10 +10,21 @@ import { uid, UIDKey } from '../src/uid.ts';
 
 Deno.test('Engine', async (test) => {
 	const Engine = engine<Entity, Component, ComponentData>();
-	const { getUID } = uid(Engine.getEntityList);
+	const { getUID, reset } = uid(Engine.getEntityList);
 
-	await test.step('expect Engine.getUID to be 1', () => {
+	await test.step('expect getUID to be 1', () => {
 		assertEquals(getUID(UIDKey.ENTITY), 1);
+		assertEquals(getUID(UIDKey.SYSTEM), 1);
+		assertEquals(getUID(UIDKey.INTERNAL), 1);
+	});
+	await test.step('expect reset to reset the uids', () => {
+		assertEquals(getUID(UIDKey.ENTITY), 2);
+		assertEquals(getUID(UIDKey.SYSTEM), 2);
+		assertEquals(getUID(UIDKey.INTERNAL), 2);
+		reset();
+		assertEquals(getUID(UIDKey.ENTITY), 1);
+		assertEquals(getUID(UIDKey.SYSTEM), 1);
+		assertEquals(getUID(UIDKey.INTERNAL), 1);
 	});
 
 	await test.step('expect Engine.getEntityList to be empty', () => {
@@ -104,5 +115,22 @@ Deno.test('Engine', async (test) => {
 				Component.COMPONENT_B,
 			).length === 1,
 		);
+	});
+
+	await test.step('expect Engine.destroy to remove everything and reset ids', async () => {
+		await Engine.destroy();
+
+		assertEquals(Engine.getEntityList().length, 0);
+		assertEquals(Engine.getSystem(System.SYSTEM_B), undefined);
+
+		await Engine.addEntity(
+			{
+				force: true,
+				entities: [
+					getEntity(getUID(UIDKey.ENTITY), Entity.EXAMPLE_A, {}, [])({}),
+				],
+			},
+		);
+		assertEquals(Engine.getEntityList().length, 1);
 	});
 });

@@ -58,6 +58,7 @@ export interface EngineType<I, C extends string | number, D> {
 	getSystem: (name: number) => SystemType<C> | undefined;
 
 	clear: () => void;
+	destroy: () => Promise<void>;
 
 	load: (config?: LoadConfig) => Promise<void>;
 	pause: () => Promise<void>;

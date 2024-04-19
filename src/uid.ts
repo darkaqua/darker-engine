@@ -25,15 +25,27 @@ export const uid = <I, C extends string | number, D>(
 
 		const _getUID = (): number => (safe ? lastSafeIdMap[key] : lastIdMap[key]) + increment;
 		do {
+			console.log(lastSafeIdMap[key]);
 			if (safe) lastSafeIdMap[key]++;
 			else lastIdMap[key]++;
 		} while (idCheckMapFunc[key](_getUID()));
 		return _getUID();
 	};
 
+	const reset = () => {
+		lastSafeIdMap[UIDKey.ENTITY] = 0;
+		lastSafeIdMap[UIDKey.SYSTEM] = 0;
+		lastSafeIdMap[UIDKey.INTERNAL] = 0;
+
+		lastIdMap[UIDKey.ENTITY] = 0;
+		lastIdMap[UIDKey.SYSTEM] = 0;
+		lastIdMap[UIDKey.INTERNAL] = 0;
+	};
+
 	return {
 		lastIdMap,
 		getUID,
+		reset,
 	};
 };
 
